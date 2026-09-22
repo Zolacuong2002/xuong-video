@@ -1,0 +1,13 @@
+{
+  "_ghi_chu": "Lời cố định của kênh, máy tự chèn vào mọi kịch bản: gioi_thieu đứng ngay sau Hook, keu_goi là đoạn cuối cùng của video (sau Chốt). Sửa ở đây là video sau đổi theo. Viết số bằng chữ để giọng đọc đúng. danh_sach_phat: tên danh sách phát trên YouTube + từ khoá (regex) để máy tự gán video vào danh sách.",
+  "gioi_thieu": "Chào mừng bạn đến với <TÊN KÊNH>, kênh <một câu nói kênh làm gì cho ai>. Nếu đây là lần đầu bạn ghé kênh, bấm đăng ký để không lỡ video mới mỗi tuần.",
+  "keu_goi": "Nếu video này có ích cho bạn, hãy bấm thích và đăng ký kênh <TÊN KÊNH>, mỗi tuần mình đăng hai đến ba video như thế này. Bạn định làm việc nào trước trong số vừa kể, viết cho mình dưới bình luận nhé. Hẹn gặp bạn ở video sau.",
+  "khau_hieu": "<Khẩu hiệu một câu của kênh, hiện trên thẻ kênh sau hook>",
+  "giu_man_ket_giay": 0,
+  "man_ket_hinh_dang_ky": false,
+  "danh_sach_phat": [
+    { "ten": "<Danh sách phát 1>", "tu_khoa": "thói quen" },
+    { "ten": "<Danh sách phát 2>", "tu_khoa": "cách|mẹo" },
+    { "ten": "<Danh sách phát 3>", "tu_khoa": "" }
+  ]
+}

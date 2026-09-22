@@ -1,0 +1,33 @@
+# ── Riêng tư: không bao giờ lên git ──
+config.env
+.apify.env
+.gemini.env
+cf-anh/.khoa.tmp
+cf-anh/.wrangler/
+.yt-profile/
+
+# ── Của riêng kênh bạn (giọng, nhân vật, nội dung) ──
+giong/*.wav
+giong/*.mp3
+giong/*.m4a
+giong/thu/
+nhan-vat/chuan/
+nhan-vat/*.jpg
+nhan-vat/*.png
+nhan-vat/kenh/*.png
+nhan-vat/kenh/thong-tin-kenh.md
+nhac/nen.mp3
+nganh/
+ke-hoach-noi-dung.md
+
+# ── Máy tự sinh ──
+ra/
+kho-dang/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+server.log
+.venv-giong/
+node_modules/
+__pycache__/

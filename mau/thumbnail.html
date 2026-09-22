@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>thumbnail</title>
+<style>
+/*THUONG_HIEU*/
+/* Thumbnail theo thể loại kênh tài chính truyện tranh: NỀN SÁNG, chữ đen cực đậm, một từ đỏ,
+   nhân vật chiếm nửa phải. Khác hẳn slide nền tối trong video — thumbnail phải nổi giữa lưới YouTube trắng. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:#FFFFFF;font-family:var(--chu)}
+body{position:relative}
+body::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(760px 620px at 82% 55%, rgba(245,158,11,.22), transparent 70%);
+}
+/* multiply: nền trắng của ảnh nhân vật hoà vào nền, không che quầng cam phía sau thành hình chữ nhật */
+.nhan-vat{position:absolute;right:-10px;bottom:0;height:712px;width:auto;z-index:1;mix-blend-mode:multiply}
+.chu-khoi{position:absolute;left:52px;top:0;bottom:0;width:720px;display:flex;flex-direction:column;justify-content:center;z-index:2}
+.chu{
+  font-size:104px;font-weight:900;line-height:1.02;letter-spacing:-.035em;text-transform:uppercase;
+  color:#111418;text-wrap:balance;
+  paint-order:stroke fill;-webkit-text-stroke:10px #FFFFFF;
+}
+.chu b{color:#D92D20;font-weight:900}
+.phu{
+  margin-top:26px;align-self:flex-start;
+  font-size:40px;font-weight:800;color:#FFFFFF;background:#111418;
+  padding:12px 26px;border-radius:10px;transform:rotate(-1.5deg);max-width:680px;
+}
+.kenh{position:absolute;left:52px;top:36px;z-index:3;display:flex;align-items:center;gap:10px;font-size:26px;font-weight:800;color:#111418}
+.kenh::before{content:"⚙";color:var(--nhan);font-size:30px}
+.kenh::after{content:var(--ten-kenh)}
+/* Không có ảnh nhân vật → chữ được rộng cả khung */
+body.khong-anh .chu-khoi{width:1180px}
+body.khong-anh .chu{font-size:118px}
+</style>
+</head>
+<body>
+<script id="du-lieu" type="application/json">__DU_LIEU__</script>
+<div class="kenh"></div>
+<img class="nhan-vat" id="anh" alt="" hidden>
+<div class="chu-khoi"><div class="chu" id="chu"></div><div class="phu" id="phu" hidden></div></div>
+<script>
+(function(){
+  var D = JSON.parse(document.getElementById("du-lieu").textContent);
+  function e(s){ return String(s||"").replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  var chu = String(D.chu || "").trim();
+  var nhan = String(D.nhan || "").trim();
+  var html = e(chu);
+  // Tô đỏ đúng cụm bước 08 chọn; không khớp thì tô từ cuối
+  if (nhan && chu.toUpperCase().indexOf(nhan.toUpperCase()) >= 0) {
+    var i = chu.toUpperCase().indexOf(nhan.toUpperCase());
+    html = e(chu.slice(0, i)) + "<b>" + e(chu.slice(i, i + nhan.length)) + "</b>" + e(chu.slice(i + nhan.length));
+  } else {
+    var tu = chu.split(/\s+/); var cuoi = tu.length > 1 ? tu.pop() : "";
+    html = e(tu.join(" ")) + (cuoi ? " <b>" + e(cuoi) + "</b>" : "");
+  }
+  var el = document.getElementById("chu");
+  el.innerHTML = html;
+  if (chu.length > 22) el.style.fontSize = D.anh ? "88px" : "100px";
+  if (chu.length > 32) el.style.fontSize = D.anh ? "74px" : "86px";
+  if (D.phu) { var p = document.getElementById("phu"); p.textContent = D.phu; p.hidden = false; }
+  if (D.anh) { var a = document.getElementById("anh"); a.src = D.anh; a.hidden = false; }
+  else document.body.classList.add("khong-anh");
+})();
+</script>
+</body>
+</html>

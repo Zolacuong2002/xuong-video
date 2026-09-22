@@ -1,0 +1,13 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><style>
+/*THUONG_HIEU*/
+*{margin:0;padding:0;box-sizing:border-box}
+/* YouTube cắt tròn ảnh đại diện: mặt nhân vật phải nằm gọn trong vòng tròn đường kính 800, mọi thứ ở góc bị cắt. */
+html,body{width:800px;height:800px;overflow:hidden;background:#FFFFFF}
+body{position:relative}
+.nen{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%, #FFF3DC 0%, #FFE2B0 55%, var(--nhan) 56%, var(--nhan) 100%)}
+.mat{position:absolute;left:50%;top:50%;width:700px;height:700px;transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;background:#FFF6E8}
+.mat img{width:118%;height:auto;position:absolute;left:50%;top:-4%;transform:translateX(-50%);mix-blend-mode:multiply}
+</style></head><body>
+<div class="nen"></div>
+<div class="mat"><img src="../chuan/nhan-vat-goc-mat.jpg" alt=""></div>
+</body></html>

@@ -1,0 +1,11 @@
+# Worker tạo ảnh cho Xưởng Video. Dùng AI binding nên KHÔNG cần token có quyền Workers AI;
+# ăn hạn mức miễn phí 10.000 neuron/ngày của tài khoản Cloudflare của bạn.
+# Lấy account_id: dash.cloudflare.com → Workers & Pages → cột phải "Account ID".
+name = "xuong-anh"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+account_id = "<ACCOUNT_ID_CLOUDFLARE_CUA_BAN>"
+workers_dev = true
+
+[ai]
+binding = "AI"

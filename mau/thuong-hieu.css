@@ -1,0 +1,34 @@
+/* ─────────────────────────────────────────────────────────────
+   THƯƠNG HIỆU — MỘT chỗ sửa cho cả slide, Shorts lẫn thumbnail.
+   Đổi màu/font ở đây là mọi video đổi theo. Không cần đụng mã.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  /* Tên kênh hiện góc dưới trái mỗi slide (đặt trùng XV_TEN_KENH trong config.env) */
+  --ten-kenh: "Kênh Của Bạn";  /* ← đổi tên kênh ở đây */
+
+  /* Nền tối cho video — đọc rõ trên YouTube, đỡ chói khi xem đêm */
+  --nen:        #0F1720;
+  --nen-2:      #16212C;
+  --muc:        #F2F5F7;
+  --muc-mo:     #9AAAB8;
+  --vien:       #253242;
+
+  /* Màu nhấn của kênh — nên trùng màu trang phục đặc trưng của nhân vật (nhan-vat/nhan-vat.json) */
+  --nhan:       #F59E0B;
+  --nhan-dam:   #B45309;
+  --nhan-nen:   rgba(245,158,11,.14);
+
+  /* Màu phụ cho so sánh/biểu đồ */
+  --phu-1:      #38BDF8;
+  --phu-2:      #A78BFA;
+  --tot:        #34D399;
+  --xau:        #F87171;
+
+  /* Chữ: Segoe UI có sẵn trên Windows 11, dấu tiếng Việt đầy đủ */
+  --chu:        "Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --chu-so:     "Cascadia Code","Consolas","Segoe UI Mono",ui-monospace,monospace;
+
+  /* Bo góc + lề an toàn (YouTube che góc dưới phải bằng thanh thời gian) */
+  --r:          14px;
+  --le:         96px;
+}

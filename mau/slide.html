@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>slide</title>
+<style>
+/*THUONG_HIEU*/
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;color:var(--muc);font-family:var(--chu)}
+/* nền đặt ở body (không đặt ở html) để lớp phủ trong suốt tắt được */
+body{position:relative;background:var(--nen)}
+
+/* nền có kết cấu nhẹ để không phẳng lì */
+body::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(1200px 700px at 85% -10%, var(--nhan-nen), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(56,189,248,.08), transparent 60%);
+}
+.slide{position:absolute;inset:0;padding:var(--le);display:flex;flex-direction:column}
+
+/* thanh nhấn + tên kênh */
+.thanh{position:absolute;left:var(--le);top:64px;width:88px;height:8px;background:var(--nhan);border-radius:4px}
+.kenh{
+  position:absolute;left:var(--le);bottom:52px;
+  font-size:26px;font-weight:600;color:var(--muc-mo);letter-spacing:.02em;
+  display:flex;align-items:center;gap:14px;
+}
+.kenh::before{content:"⚙";color:var(--nhan);font-size:28px}
+.kenh::after{content:var(--ten-kenh)}
+.dem{position:absolute;right:var(--le);bottom:56px;font-family:var(--chu-so);font-size:22px;color:var(--muc-mo);opacity:.7}
+
+.nhan{font-size:30px;font-weight:600;color:var(--nhan);letter-spacing:.14em;text-transform:uppercase;margin-bottom:26px}
+h1{font-size:84px;font-weight:800;line-height:1.12;letter-spacing:-.02em;text-wrap:balance;max-width:1500px}
+h2{font-size:64px;font-weight:700;line-height:1.16;letter-spacing:-.015em;text-wrap:balance;max-width:1600px}
+.phu{font-size:40px;color:var(--muc-mo);margin-top:28px;max-width:1400px;line-height:1.35}
+
+/* ── tieu_de ── */
+.tieu_de .slide{justify-content:center}
+.tieu_de h1{font-size:104px}
+
+/* ── y_chinh ── */
+.y_chinh .slide{justify-content:center}
+.y_chinh ul{list-style:none;margin-top:56px;display:flex;flex-direction:column;gap:40px}
+.y_chinh li{
+  font-size:52px;line-height:1.3;display:flex;gap:30px;align-items:flex-start;max-width:1560px;
+}
+.y_chinh li::before{
+  content:"";flex:none;width:18px;height:18px;border-radius:50%;background:var(--nhan);margin-top:26px;
+}
+
+/* ── bieu_do ── */
+.bieu_do .khung{flex:1;display:flex;flex-direction:column;margin-top:36px;min-height:0}
+.bieu_do svg{flex:1;width:100%;height:100%}
+.bieu_do .chan{display:flex;justify-content:space-between;font-size:28px;color:var(--muc-mo);margin-top:14px;font-family:var(--chu-so)}
+
+/* ── so_sanh ── */
+.so_sanh .slide{justify-content:center}
+.so_sanh .hai{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:56px}
+.so_sanh .cot{align-self:start;background:var(--nen-2);border:1px solid var(--vien);border-radius:var(--r);padding:44px 48px}
+.so_sanh .cot h3{font-size:44px;font-weight:700;margin-bottom:30px;padding-bottom:22px;border-bottom:3px solid var(--phu-1)}
+.so_sanh .cot.phai h3{border-color:var(--nhan)}
+.so_sanh .cot li{font-size:40px;line-height:1.35;list-style:none;display:flex;gap:20px;margin-bottom:22px}
+.so_sanh .cot li::before{content:"—";color:var(--muc-mo)}
+
+/* ── trich_dan ── */
+.trich_dan .slide{justify-content:center}
+.trich_dan blockquote{font-size:76px;font-weight:600;line-height:1.25;letter-spacing:-.015em;max-width:1560px;text-wrap:balance;position:relative;padding-left:56px;border-left:10px solid var(--nhan)}
+.trich_dan cite{display:block;margin-top:44px;font-style:normal;font-size:38px;color:var(--muc-mo)}
+
+/* ── có tranh minh hoạ: TRANH PHỦ TOÀN MÀN HÌNH, chữ nằm dải mờ phía dưới ──
+   Tranh vẽ 1024×576 phóng lên 1920 (1,9 lần) — nét truyện tranh phẳng chịu được, mắt xem
+   trên điện thoại thấy nhân vật to rõ. Chữ chỉ giữ tiêu đề + tối đa 3 ý dạng thẻ, không
+   che tranh. Bước 06 phóng tranh (Ken Burns) riêng, chữ đứng yên → cần lớp phủ trong suốt
+   (body.lop-phu): cùng bố cục này nhưng bỏ tranh và bỏ nền. */
+body.co-anh{background:var(--nen)}
+body.co-anh::before{display:none}
+.co-anh .tranh{position:absolute;inset:0;z-index:0}
+.co-anh .tranh img{width:100%;height:100%;object-fit:cover;display:block}
+.co-anh .dai{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top, rgba(15,23,32,.97) 0%, rgba(15,23,32,.88) 16%, rgba(15,23,32,.55) 30%, rgba(15,23,32,.18) 42%, transparent 54%);
+}
+body.co-anh .slide{z-index:2;justify-content:flex-end;padding:0 var(--le) 128px}
+.co-anh .thanh{top:auto;position:static;width:72px;height:7px;margin-bottom:22px}
+.co-anh .kenh,.co-anh .dem{z-index:3}
+.co-anh .kenh{color:#E4EAF0}
+.co-anh .kenh::before{filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.co-anh .dem{color:#C7D0DA}
+.co-anh .cot-chu{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;max-width:1640px;text-shadow:0 2px 10px rgba(0,0,0,.55)}
+.co-anh h1{font-size:74px;line-height:1.12;text-wrap:pretty;max-width:1640px}
+.co-anh h2{font-size:60px;line-height:1.14;text-wrap:pretty;max-width:1640px}
+.co-anh.tieu_de h1{font-size:80px}
+.co-anh .nhan{font-size:26px;margin-bottom:16px;text-shadow:none}
+.co-anh .phu{font-size:34px;margin-top:18px;color:#D3DBE4;max-width:1500px}
+/* ý chính = thẻ nằm ngang, gọn, không che tranh */
+.co-anh.y_chinh ul{margin-top:26px;display:flex;flex-wrap:wrap;gap:14px 16px;max-width:1640px}
+.co-anh.y_chinh li{
+  font-size:31px;line-height:1.25;gap:0;align-items:center;max-width:none;
+  padding:12px 26px 13px;border-radius:999px;
+  background:rgba(22,33,44,.78);border:1.5px solid rgba(255,255,255,.16);color:#EEF2F6;text-shadow:none;
+  backdrop-filter:blur(6px);
+}
+.co-anh.y_chinh li::before{width:11px;height:11px;margin:0 14px 0 0}
+.co-anh.chot .goi{font-size:32px;padding:18px 34px;margin-top:26px;gap:14px;text-shadow:none}
+
+/* lớp phủ trong suốt cho bước 06 (chữ + dải mờ, không tranh, không nền) */
+body.lop-phu,body.lop-phu.co-anh{background:transparent}
+body.lop-phu::before{display:none}
+body.lop-phu .tranh{display:none}
+
+/* ── gioi_thieu: thẻ kênh sau Hook — avatar + tên + khẩu hiệu + nút Đăng ký ── */
+.gioi_thieu .slide{justify-content:center}
+.the-kenh{display:flex;align-items:center;gap:88px}
+.the-kenh .vong{flex:none;width:440px;height:440px;border-radius:50%;padding:10px;background:linear-gradient(135deg,var(--nhan),#FBBF24);box-shadow:0 30px 90px rgba(245,158,11,.25)}
+.the-kenh .vong img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:#fff}
+.the-kenh .chu{min-width:0}
+.the-kenh .nhan{margin-bottom:18px}
+.the-kenh h1{font-size:118px;line-height:1.05;letter-spacing:-.03em}
+.the-kenh .khau-hieu{font-size:40px;color:var(--muc-mo);margin-top:26px;max-width:1100px;line-height:1.35;text-wrap:pretty}
+.hang-dk{display:flex;align-items:center;gap:26px;margin-top:44px}
+.nut-dk{display:inline-flex;align-items:center;gap:16px;background:#E5202B;color:#fff;font-size:38px;font-weight:700;letter-spacing:.06em;padding:20px 44px;border-radius:12px;box-shadow:0 14px 40px rgba(229,32,43,.35)}
+.nut-dk::before{content:"▶";font-size:30px}
+.chuong{width:64px;height:64px;border-radius:50%;border:2px solid var(--vien);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--muc-mo)}
+.nhip{font-size:32px;color:var(--muc-mo)}
+
+/* ── ket_thuc: màn kết 12s cuối — chỗ đặt end screen của YouTube (Đăng ký lên vòng tròn trái, Video lên khung phải) ── */
+.ket_thuc .slide{justify-content:center}
+.man-ket{display:grid;grid-template-columns:560px 1fr;gap:80px;align-items:center;margin-top:36px}
+.man-ket .trai{display:flex;flex-direction:column;align-items:center;gap:30px}
+.man-ket .vong{width:340px;height:340px;border-radius:50%;padding:8px;background:linear-gradient(135deg,var(--nhan),#FBBF24)}
+.man-ket .vong img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:#fff}
+.man-ket .ten{font-size:40px;font-weight:700}
+.man-ket .khung{aspect-ratio:16/9;border:4px dashed rgba(255,255,255,.28);border-radius:20px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--muc-mo)}
+.man-ket .khung .to{font-size:44px;font-weight:700;color:var(--muc)}
+.man-ket .khung .nho{font-size:28px}
+.man-ket .khung .play{width:110px;height:110px;border-radius:50%;background:var(--nhan);color:#1A1205;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:10px}
+
+/* ── chot ── */
+.chot .slide{justify-content:center}
+.chot .goi{
+  margin-top:56px;display:inline-flex;align-items:center;gap:22px;width:fit-content;
+  background:var(--nhan);color:#1A1205;font-size:42px;font-weight:700;padding:26px 48px;border-radius:999px;
+}
+</style>
+</head>
+<body>
+<script id="du-lieu" type="application/json">__DU_LIEU__</script>
+<div id="goc"></div>
+<script>
+(function(){
+  var D = JSON.parse(document.getElementById("du-lieu").textContent);
+  var goc = document.getElementById("goc");
+  document.body.classList.add(D.bo_cuc || "y_chinh");
+
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function so(n){ return Number(n).toLocaleString("vi-VN", {maximumFractionDigits: 2}); }
+  function khung(inner){
+    // Anh bỏ số trang (34/120) ở góc dưới phải — 14/09
+    return '<div class="thanh"></div><div class="slide">' + inner + '</div><div class="kenh"></div>';
+  }
+
+  // Có tranh minh hoạ → tranh phủ toàn màn hình, chữ nằm dải dưới.
+  // D.lop_phu = true → chỉ vẽ chữ + dải mờ trên nền trong suốt (bước 06 ghép lên tranh đang phóng).
+  var coAnh = (!!D.anh || !!D.lop_phu) && (D.bo_cuc === "tieu_de" || D.bo_cuc === "y_chinh" || D.bo_cuc === "chot" || !D.bo_cuc);
+  if (coAnh) document.body.classList.add("co-anh");
+  if (D.lop_phu) document.body.classList.add("lop-phu");
+  function toanMan(chu){
+    if (!coAnh) return chu;
+    var tranh = D.lop_phu ? '' : '<div class="tranh"><img src="' + e(D.anh) + '" alt=""></div>';
+    // thanh nhấn nằm trong cột chữ để đứng ngay trên tiêu đề
+    return tranh + '<div class="dai"></div><div class="cot-chu"><div class="thanh"></div>' + chu + '</div>';
+  }
+  function yThe(arr){
+    // tối đa 3 thẻ khi có tranh; slide không tranh giữ đủ ý
+    var ys = (arr || []).filter(function(x){ return x && String(x).trim(); });
+    if (coAnh) ys = ys.slice(0, 3);
+    return ys.map(function(x){ return "<li>" + e(x) + "</li>"; }).join("");
+  }
+
+  var html = "";
+  switch (D.bo_cuc) {
+    case "tieu_de":
+      // Chỉ slide đầu tiên mới là "Bắt đầu" — trước đây mọi slide mở mục đều ghi chữ này
+      html = khung(toanMan((D.thu_tu === 1 ? '<div class="nhan">Bắt đầu</div>' : '') +
+        '<h1>' + e(D.tieu_de) + '</h1>' + (D.y && D.y[0] ? '<p class="phu">' + e(D.y[0]) + '</p>' : '')));
+      break;
+
+    case "bieu_do": {
+      var b = D.bieu_do || {};
+      html = khung('<h2>' + e(D.tieu_de) + '</h2><div class="khung">' + veBieuDo(b) +
+        '<div class="chan"><span>' + e(b.don_vi || "") + '</span><span>' + (b.nguon ? "Nguồn: " + e(b.nguon) : "") + '</span></div></div>');
+      break;
+    }
+
+    case "so_sanh": {
+      var s = D.so_sanh || {};
+      var li = function(arr){ return (arr||[]).map(function(x){ return "<li>" + e(x) + "</li>"; }).join(""); };
+      html = khung('<h2>' + e(D.tieu_de) + '</h2><div class="hai">' +
+        '<div class="cot trai"><h3>' + e(s.trai_ten) + '</h3><ul>' + li(s.trai_y) + '</ul></div>' +
+        '<div class="cot phai"><h3>' + e(s.phai_ten) + '</h3><ul>' + li(s.phai_y) + '</ul></div></div>');
+      break;
+    }
+
+    case "trich_dan": {
+      var t = D.trich_dan || {};
+      html = khung('<blockquote>' + e(t.cau) + '</blockquote>' + (t.nguoi ? '<cite>— ' + e(t.nguoi) + '</cite>' : ''));
+      break;
+    }
+
+    case "gioi_thieu": {
+      var lk = D.loi_kenh || {};
+      html = khung('<div class="the-kenh"><div class="vong"><img src="' + e(D.avatar || "") + '" alt=""></div><div class="chu">' +
+        '<div class="nhan">Kênh</div><h1>' + e(getComputedStyle(document.documentElement).getPropertyValue("--ten-kenh").replace(/^\s*"|"\s*$/g, "")) + '</h1>' +
+        '<p class="khau-hieu">' + e(lk.khau_hieu || "") + '</p>' +
+        '<div class="hang-dk"><span class="nut-dk">Đăng ký</span><span class="chuong">🔔</span><span class="nhip">2–3 video mỗi tuần</span></div></div></div>');
+      break;
+    }
+
+    case "ket_thuc": {
+      var ten = getComputedStyle(document.documentElement).getPropertyValue("--ten-kenh").replace(/^\s*"|"\s*$/g, "");
+      html = khung('<div class="nhan">Cảm ơn bạn đã xem</div><h2>Đăng ký kênh để không lỡ video sau</h2>' +
+        '<div class="man-ket"><div class="trai"><div class="vong"><img src="' + e(D.avatar || "") + '" alt=""></div>' +
+        '<div class="ten">' + e(ten) + '</div><span class="nut-dk">Đăng ký</span></div>' +
+        '<div class="khung"><div class="play">▶</div><div class="to">Video tiếp theo</div><div class="nho">bấm để xem</div></div></div>');
+      break;
+    }
+
+    case "chot":
+      html = khung(toanMan('<div class="nhan">Tóm lại</div><h1>' + e(D.tieu_de) + '</h1>' +
+        (D.y && D.y[0] ? '<div class="goi">' + e(D.y[0]) + ' →</div>' : '')));
+      break;
+
+    default:
+      html = khung(toanMan('<h2>' + e(D.tieu_de) + '</h2><ul>' + yThe(D.y) + '</ul>'));
+  }
+  goc.innerHTML = html;
+  // slide có tranh: thanh nhấn góc trên đã chuyển vào cột chữ → bỏ cái ngoài
+  if (coAnh) { var thanhNgoai = goc.querySelector(":scope > .thanh"); if (thanhNgoai) thanhNgoai.remove(); }
+
+  // ── biểu đồ SVG thuần: cột hoặc đường, tối đa 12 điểm ──
+  function veBieuDo(b){
+    var nhan = (b.nhan||[]).slice(0,12), gt = (b.gia_tri||[]).slice(0,12).map(Number);
+    if (gt.length < 2) return "";
+    var W = 1728, H = 560, L = 40, R = 40, T = 70, B = 90;
+    var max = Math.max.apply(null, gt), min = Math.min.apply(null, gt);
+    var duong = b.loai === "duong";
+    var y0 = duong ? Math.min(0, min) : Math.min(0, min);
+    if (duong && min > 0 && (max - min) / max < 0.35) y0 = Math.floor(min - (max-min)*0.6);
+    var y1 = max === y0 ? max + 1 : max + (max - y0) * 0.12;
+    var cw = (W - L - R) / gt.length;
+    function X(i){ return L + cw * i + cw / 2; }
+    function Y(v){ return T + (H - T - B) * (1 - (v - y0) / (y1 - y0)); }
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" font-family="' + getComputedStyle(document.documentElement).getPropertyValue("--chu-so") + '">';
+    // đường cơ sở
+    s += '<line x1="' + L + '" y1="' + Y(y0) + '" x2="' + (W-R) + '" y2="' + Y(y0) + '" stroke="var(--vien)" stroke-width="2"/>';
+    if (duong) {
+      var pts = gt.map(function(v,i){ return X(i) + "," + Y(v); }).join(" ");
+      var area = L + "," + Y(y0) + " " + pts + " " + (W-R) + "," + Y(y0);
+      s += '<polygon points="' + area + '" fill="var(--nhan)" opacity=".12"/>';
+      s += '<polyline points="' + pts + '" fill="none" stroke="var(--nhan)" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>';
+      gt.forEach(function(v,i){
+        s += '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="12" fill="var(--nen)" stroke="var(--nhan)" stroke-width="6"/>';
+        s += '<text x="' + X(i) + '" y="' + (Y(v) - 26) + '" text-anchor="middle" font-size="30" font-weight="700" fill="var(--muc)">' + e(so(v)) + '</text>';
+      });
+    } else {
+      var bw = Math.min(cw * 0.58, 180);
+      gt.forEach(function(v,i){
+        var y = Y(Math.max(v, y0)), h = Math.abs(Y(v) - Y(y0));
+        var mau = (i === gt.length - 1) ? "var(--nhan)" : "var(--phu-1)";
+        s += '<rect x="' + (X(i) - bw/2) + '" y="' + y + '" width="' + bw + '" height="' + Math.max(h, 3) + '" rx="8" fill="' + mau + '"/>';
+        s += '<text x="' + X(i) + '" y="' + (y - 18) + '" text-anchor="middle" font-size="32" font-weight="700" fill="var(--muc)">' + e(so(v)) + '</text>';
+      });
+    }
+    nhan.forEach(function(n,i){
+      s += '<text x="' + X(i) + '" y="' + (H - 34) + '" text-anchor="middle" font-size="28" fill="var(--muc-mo)">' + e(n) + '</text>';
+    });
+    return s + '</svg>';
+  }
+})();
+</script>
+</body>
+</html>

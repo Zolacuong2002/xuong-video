@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Xưởng Video · Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Lexend:wght@300;400;500;600&display=swap">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   PHÒNG ĐIỀU KHIỂN SẢN XUẤT
+   Màu theo đèn trường quay: đỏ = đang quay (tally), hổ phách = chờ anh (standby, cũng là màu kênh),
+   xanh = xong. Nền tối vì cạnh màn hình xem trước — khung hình phải nổi, mắt không mỏi.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --nen:#12161C; --tam:#1A1F27; --noi:#222833; --noi-2:#2A313D; --vien:#2E3643; --vien-sang:#3C4655;
+  --chu:#E6EAF0; --mo:#8A94A4; --mo-2:#6A7383;
+  --ho-phach:#F5A524; --ho-phach-dam:#C97F0A; --ho-phach-nen:rgba(245,165,36,.12);
+  --tally:#FF4545; --tally-nen:rgba(255,69,69,.14);
+  --xanh:#34D399; --xanh-nen:rgba(52,211,153,.12);
+  --f-nhan:"Barlow Condensed","Arial Narrow","Segoe UI",sans-serif;
+  --f-chu:"Lexend","Segoe UI",system-ui,sans-serif;
+  --f-so:"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  --r:8px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--nen);color:var(--chu);font:400 14.5px/1.55 var(--f-chu);-webkit-font-smoothing:antialiased;min-height:100vh}
+h1,h2,h3,p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--ho-phach)}
+:focus-visible{outline:2px solid var(--ho-phach);outline-offset:2px}
+[hidden]{display:none!important}
+.so{font-family:var(--f-so);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.nhan{font-family:var(--f-nhan);font-weight:600;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mo)}
+
+/* ── nút ── */
+.nut{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--vien-sang);background:var(--noi);color:var(--chu);
+  padding:8px 14px;border-radius:6px;font-weight:500;font-size:13.5px;cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s}
+.nut:hover{border-color:var(--mo)}
+.nut.chinh{background:var(--ho-phach);border-color:var(--ho-phach);color:#1B1203;font-weight:600}
+.nut.chinh:hover{background:#FFB83D}
+.nut.nho{padding:5px 10px;font-size:12.5px}
+.nut.nguy{color:#FF8A8A;border-color:rgba(255,69,69,.35);background:transparent}
+.nut.nguy:hover{border-color:var(--tally)}
+.nut:disabled{opacity:.4;cursor:not-allowed}
+select.nut{padding-right:8px}
+
+/* ── thanh trên ── */
+.dau{position:sticky;top:0;z-index:20;background:rgba(18,22,28,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--vien)}
+.dau-trong{max-width:1440px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:22px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-o{width:28px;height:28px;border-radius:6px;background:var(--ho-phach);display:grid;place-items:center}
+.logo-o::after{content:"";width:10px;height:10px;border-radius:50%;background:#1B1203}
+.logo-chu{font-family:var(--f-nhan);font-weight:700;font-size:20px;letter-spacing:.1em;text-transform:uppercase}
+.logo-chu small{font-weight:500;color:var(--mo);letter-spacing:.14em;margin-left:6px;font-size:13px}
+.tabs{display:flex;gap:4px}
+.tabs button{border:0;background:transparent;color:var(--mo);padding:8px 14px;border-radius:6px;cursor:pointer;
+  font-family:var(--f-nhan);font-weight:600;font-size:15px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.tabs button:hover{color:var(--chu)}
+.tabs button[aria-selected=true]{color:var(--chu);background:var(--noi)}
+.dem-duyet{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--ho-phach);color:#1B1203;
+  font-family:var(--f-so);font-size:11.5px;font-weight:600;display:inline-grid;place-items:center;letter-spacing:0}
+.dem-duyet:empty{display:none}
+.dau-phai{margin-left:auto;display:flex;align-items:center;gap:18px}
+.tien{text-align:right;line-height:1.25}
+.tien .so{font-size:14px;color:var(--chu)}
+.tien .nhan{font-size:11px}
+
+/* đèn trạng thái — tally */
+.den{display:inline-flex;align-items:center;gap:9px;padding:6px 14px 6px 12px;border-radius:999px;border:1px solid var(--vien-sang);
+  font-family:var(--f-nhan);font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mo)}
+.den i{width:9px;height:9px;border-radius:50%;background:var(--mo-2)}
+.den.song{color:var(--tally);border-color:rgba(255,69,69,.45);background:var(--tally-nen)}
+.den.song i{background:var(--tally);box-shadow:0 0 0 0 rgba(255,69,69,.6);animation:tally 1.6s infinite}
+.den.cho{color:var(--ho-phach);border-color:rgba(245,165,36,.45);background:var(--ho-phach-nen)}
+.den.cho i{background:var(--ho-phach)}
+@keyframes tally{0%{box-shadow:0 0 0 0 rgba(255,69,69,.55)}70%{box-shadow:0 0 0 8px rgba(255,69,69,0)}100%{box-shadow:0 0 0 0 rgba(255,69,69,0)}}
+
+.giay{max-width:1440px;margin:0 auto;padding:20px 24px 80px}
+.tam{background:var(--tam);border:1px solid var(--vien);border-radius:var(--r)}
+.tam-dau{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--vien)}
+.tam-than{padding:18px}
+
+/* băng tạm dừng */
+.bang-dung{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:var(--r);margin-bottom:16px;
+  border:1px solid rgba(245,165,36,.5);background:var(--ho-phach-nen)}
+.bang-dung .den{flex:none}
+.bang-dung p{flex:1;font-size:14px}
+.canh-khoa{padding:10px 16px;border-radius:var(--r);margin-bottom:16px;border:1px solid rgba(255,69,69,.4);background:var(--tally-nen);font-size:13.5px}
+
+/* ══ STUDIO ══ */
+.san-khau{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px}
+
+/* màn hình xem trước */
+.man-hinh{position:relative;aspect-ratio:16/9;background:#07090C;border-radius:var(--r);overflow:hidden;border:1px solid var(--vien)}
+.man-hinh img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#07090C}
+.mh-rec{position:absolute;top:12px;left:14px;display:flex;align-items:center;gap:8px;z-index:2;
+  font-family:var(--f-nhan);font-weight:700;letter-spacing:.14em;font-size:13px;padding:3px 10px;border-radius:4px;background:rgba(0,0,0,.55);color:var(--mo)}
+.mh-rec i{width:8px;height:8px;border-radius:50%;background:var(--mo-2)}
+.mh-rec.song{color:#fff}.mh-rec.song i{background:var(--tally);animation:tally 1.6s infinite}
+.mh-tc{position:absolute;right:14px;bottom:12px;z-index:2;font-family:var(--f-so);font-size:14px;padding:3px 9px;border-radius:4px;background:rgba(0,0,0,.6);color:#fff}
+.mh-nguon{position:absolute;left:14px;bottom:12px;z-index:2;font-size:12px;padding:3px 9px;border-radius:4px;background:rgba(0,0,0,.6);color:var(--mo)}
+/* bảng clapper khi chưa có khung hình */
+.clapper{position:absolute;inset:0;display:grid;place-items:center;padding:28px}
+.clapper-o{width:min(520px,88%);border:2px solid #E6EAF0;border-radius:6px;overflow:hidden;background:#0B0E12}
+.clapper-soc{height:30px;background:repeating-linear-gradient(-45deg,#E6EAF0 0 18px,#0B0E12 18px 36px)}
+.clapper-luoi{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid #E6EAF0}
+.clapper-luoi div{padding:10px 14px;border-right:2px solid #E6EAF0}
+.clapper-luoi div:last-child{border-right:0}
+.clapper-luoi .nhan{font-size:11px;color:#9AA3B2}
+.clapper-luoi .so{font-size:22px;color:#fff;display:block;margin-top:2px}
+.clapper-ten{padding:12px 14px;border-top:2px solid #E6EAF0;font-family:var(--f-nhan);font-weight:600;font-size:20px;letter-spacing:.03em;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* đồng hồ mức âm khi đang thu */
+.thu-am{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.thu-am-cot{display:flex;align-items:flex-end;gap:5px;height:96px}
+.thu-am-cot i{width:9px;border-radius:2px;background:linear-gradient(to top,var(--xanh) 0 55%,var(--ho-phach) 55% 82%,var(--tally) 82%);
+  animation:muc 1.1s ease-in-out infinite;transform-origin:bottom}
+@keyframes muc{0%,100%{height:18%}50%{height:92%}}
+.thu-am p{font-family:var(--f-nhan);font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mo)}
+
+/* bảng công đoạn hiện tại */
+.hien-tai{display:flex;flex-direction:column}
+.ht-ten-video{font-size:15px;color:var(--mo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ht-ten-video b{color:var(--chu);font-weight:500}
+.ht-cong-doan{font-family:var(--f-nhan);font-weight:700;font-size:52px;line-height:1;letter-spacing:.02em;text-transform:uppercase;margin:14px 0 6px}
+.ht-chi-tiet{font-size:15px;color:var(--mo);min-height:24px}
+.ht-thanh{position:relative;height:14px;border-radius:7px;background:var(--noi);overflow:hidden;margin:22px 0 10px;border:1px solid var(--vien)}
+.ht-thanh i{position:absolute;inset:0 auto 0 0;width:0;border-radius:7px;transition:width .6s ease;
+  background:linear-gradient(90deg,var(--ho-phach-dam),var(--ho-phach))}
+.ht-thanh.song i{background-image:linear-gradient(90deg,var(--ho-phach-dam),var(--ho-phach)),
+  repeating-linear-gradient(-45deg,rgba(255,255,255,.14) 0 10px,transparent 10px 20px);background-blend-mode:overlay;
+  background-size:100% 100%,28px 28px;animation:soc 1s linear infinite}
+@keyframes soc{to{background-position:0 0,28px 0}}
+.ht-thanh.xong i{background:var(--xanh)}
+.ht-thanh.dung i{background:repeating-linear-gradient(-45deg,var(--ho-phach) 0 8px,var(--ho-phach-dam) 8px 16px)}
+.ht-so{display:flex;justify-content:space-between;align-items:baseline}
+.ht-phan-tram{font-family:var(--f-so);font-size:28px;font-weight:600}
+.ht-dem{font-family:var(--f-so);font-size:14px;color:var(--mo)}
+.ht-gio{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:22px;background:var(--vien);border:1px solid var(--vien);border-radius:6px;overflow:hidden}
+.ht-gio div{background:var(--tam);padding:10px 14px}
+.ht-gio .so{font-size:19px;display:block;margin-top:2px}
+.ht-tiep{margin-top:auto;padding-top:18px;font-size:13px;color:var(--mo)}
+.ht-tiep b{color:var(--chu);font-weight:500}
+.ht-hanh-dong{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+.trong-studio{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;height:100%;min-height:260px}
+.trong-studio h2{font-family:var(--f-nhan);font-weight:700;font-size:34px;letter-spacing:.03em;text-transform:uppercase}
+.trong-studio p{color:var(--mo);max-width:44ch}
+
+/* ══ DÒNG THỜI GIAN SẢN XUẤT — dấu ấn của trang ══
+   Mỗi clip rộng theo thời gian máy thật sự tốn cho công đoạn đó. */
+.tl{margin-top:16px}
+.tl-dau{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 18px 0}
+.tl-dau .so{font-size:13px;color:var(--mo)}
+.tl-dau .so b{color:var(--chu);font-weight:500}
+.tl-khung{padding:14px 18px 18px;overflow-x:auto}
+.tl-ray{display:flex;align-items:stretch;gap:6px;min-width:1090px}
+.ky{display:flex;flex-direction:column;gap:7px;min-width:0}
+.ky-ten{font-family:var(--f-nhan);font-weight:600;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mo-2);
+  padding-bottom:5px;border-bottom:2px solid var(--vien)}
+.ky.dang .ky-ten{color:var(--ho-phach);border-color:var(--ho-phach)}
+.ky.xong .ky-ten{color:var(--xanh);border-color:rgba(52,211,153,.5)}
+.ky-clips{display:flex;gap:4px;min-width:0}
+.clip{position:relative;flex-basis:0;min-width:98px;height:66px;border-radius:6px;overflow:hidden;
+  background:var(--noi);border:1px solid var(--vien);padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between}
+.clip.cho{background:repeating-linear-gradient(-45deg,var(--noi) 0 7px,var(--tam) 7px 14px)}
+.clip-fill{position:absolute;inset:0 auto 0 0;width:0;z-index:0}
+.clip.xong .clip-fill{width:100%;background:linear-gradient(180deg,rgba(52,211,153,.2),rgba(52,211,153,.08))}
+.clip.xong{border-color:rgba(52,211,153,.4)}
+.clip.dang{border-color:var(--ho-phach);background:var(--noi-2)}
+.clip.dang .clip-fill{background:linear-gradient(180deg,rgba(245,165,36,.42),rgba(245,165,36,.18));transition:width .6s ease}
+.clip.dung{border-color:var(--ho-phach);border-style:dashed}
+.clip.loi{border-color:var(--tally);background:var(--tally-nen)}
+.clip-ten,.clip-tg{position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip-ten{font-family:var(--f-nhan);font-weight:600;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.clip.cho .clip-ten{color:var(--mo)}
+.clip-tg{font-family:var(--f-so);font-size:11.5px;color:var(--mo)}
+.clip.xong .clip-tg{color:var(--xanh)}
+.clip.dang .clip-tg{color:var(--ho-phach)}
+.clip.loi .clip-tg{color:#FF8A8A}
+/* đầu phát */
+.dau-phat{position:absolute;top:-1px;bottom:-1px;width:2px;background:var(--tally);z-index:2;transform:translateX(-1px);transition:left .6s ease}
+.dau-phat::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--tally)}
+/* mốc duyệt cắm cờ */
+.moc{flex:0 0 54px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding-bottom:2px}
+.moc-co{width:40px;height:66px;border-radius:6px;border:1px dashed var(--vien-sang);display:grid;place-items:center;position:relative;background:var(--tam)}
+.moc-co svg{width:18px;height:18px}
+.moc-ten{font-family:var(--f-nhan);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mo-2);text-align:center;line-height:1.1}
+.moc.cho .moc-co{border:1.5px solid var(--ho-phach);background:var(--ho-phach-nen);animation:cho 2s ease-in-out infinite}
+.moc.cho .moc-ten{color:var(--ho-phach)}
+.moc.da .moc-co{border:1px solid rgba(52,211,153,.5);background:var(--xanh-nen)}
+.moc.da .moc-ten{color:var(--xanh)}
+@keyframes cho{50%{box-shadow:0 0 0 6px rgba(245,165,36,.12)}}
+
+/* ══ hàng dưới: thêm chủ đề + hàng chờ ══ */
+.hang-duoi{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:16px;margin-top:16px}
+textarea.o-nhap{width:100%;min-height:110px;resize:vertical;background:var(--nen);border:1px solid var(--vien-sang);border-radius:6px;padding:10px 12px;line-height:1.55}
+textarea.o-nhap::placeholder{color:var(--mo-2)}
+.hang{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ghi{font-size:12.5px;color:var(--mo)}
+select.o-chon{background:var(--nen);border:1px solid var(--vien-sang);border-radius:6px;padding:7px 10px}
+.ds-video{list-style:none;margin:0;padding:0}
+.ds-video li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 18px;border-top:1px solid var(--vien)}
+.ds-video li:first-child{border-top:0}
+.ds-video li.dang-xem{background:var(--noi)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;
+  border:1px solid var(--vien-sang);color:var(--mo)}
+.chip i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.song{color:var(--tally);border-color:rgba(255,69,69,.4)}
+.chip.cho{color:var(--ho-phach);border-color:rgba(245,165,36,.45)}
+.chip.xong{color:var(--xanh);border-color:rgba(52,211,153,.4)}
+.chip.loi{color:#FF8A8A;border-color:rgba(255,69,69,.4)}
+.dv-ten{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv-phu{font-size:12.5px;color:var(--mo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv-loi{font-size:12.5px;color:#FF8A8A;margin-top:2px}
+.dv-nut{display:flex;gap:6px;align-items:center}
+.dv-so{font-family:var(--f-so);font-size:12px;color:var(--mo-2);min-width:26px}
+.trong{padding:30px 18px;color:var(--mo);text-align:center}
+
+/* ══ BÀN DUYỆT ══ */
+.chon-duyet{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chon-duyet button{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--vien-sang);background:var(--tam);border-radius:var(--r);padding:10px 14px;cursor:pointer;max-width:420px}
+.chon-duyet button[aria-pressed=true]{border-color:var(--ho-phach);background:var(--ho-phach-nen)}
+.chon-duyet .dv-ten{max-width:300px}
+.hai-cot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.doc{white-space:pre-wrap;font-size:13.5px;line-height:1.7;max-height:68vh;overflow:auto;background:var(--nen);border:1px solid var(--vien);border-radius:6px;padding:14px 16px;color:#C9D0DA}
+textarea.kb{width:100%;min-height:68vh;resize:vertical;background:var(--nen);border:1px solid var(--vien-sang);border-radius:6px;padding:14px 16px;line-height:1.7;font-size:14.5px}
+.soat{border:1px solid rgba(245,165,36,.45);background:var(--ho-phach-nen);border-radius:6px;padding:12px 16px;margin-bottom:16px}
+.soat b{font-family:var(--f-nhan);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ho-phach);font-size:13px}
+.soat ul{margin:8px 0 0;padding-left:18px;font-size:13.5px}
+.soat li{margin:3px 0}
+.soat code{font-family:var(--f-so);font-size:12px;background:var(--nen);padding:1px 6px;border-radius:3px;color:var(--ho-phach)}
+.kho-dau{background:var(--tam);border:1px solid var(--vien);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center}
+.kho-dau .duong{font-family:var(--f-so);font-size:12px;color:var(--mo);word-break:break-all}
+.kho-dau .tiep b{color:var(--ho-phach)}
+.muc-kho{display:flex;flex-direction:column;gap:6px;margin-top:10px;border-top:1px solid var(--vien);padding-top:10px}
+.muc-kho .dong{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.muc-kho .dong .ten{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.muc-kho .dong .tt{font-family:var(--f-so);font-size:11px;color:var(--mo)}
+.muc-kho .dong .tt.xong{color:var(--xanh)}
+.hang-shorts{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.the-short{width:200px}
+.the-short video{width:200px;aspect-ratio:9/16;background:#000;border-radius:8px;display:block}
+.the-short .ghi{margin-top:6px;font-size:12px}
+.log-buoc{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.log-buoc span{font-family:var(--f-so);font-size:11.5px;padding:3px 9px;border-radius:4px;border:1px solid var(--vien);color:var(--mo)}
+.log-buoc span.xong{border-color:rgba(52,211,153,.4);color:var(--xanh)}
+.log-buoc span.loi{border-color:rgba(255,69,69,.45);color:#FF8A8A}
+video{width:100%;border-radius:6px;background:#000;display:block}
+.thumb{width:100%;border-radius:6px;border:1px solid var(--vien);display:block}
+.chon-td label{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--vien);border-radius:6px;cursor:pointer;margin-top:8px}
+.chon-td label:has(input:checked){border-color:var(--ho-phach);background:var(--ho-phach-nen)}
+.chon-td input{margin-top:4px;accent-color:var(--ho-phach)}
+.the-tag{display:flex;flex-wrap:wrap;gap:6px}
+.the-tag span{font-size:12px;padding:2px 9px;border:1px solid var(--vien-sang);border-radius:999px;color:var(--mo)}
+.muc-duyet{margin-top:16px}
+.muc-duyet>.nhan{display:block;margin-bottom:8px}
+
+/* ══ THƯ VIỆN ══ */
+.luoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.the{background:var(--tam);border:1px solid var(--vien);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.the-anh{aspect-ratio:16/9;background:#07090C;position:relative}
+.the-anh img{width:100%;height:100%;object-fit:cover;display:block}
+.the-anh .so{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.75);color:#fff;font-size:12px;padding:2px 7px;border-radius:4px}
+.the-than{padding:14px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.the-ten{font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.the-chan{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+@media (max-width:1100px){
+  .san-khau,.hang-duoi,.hai-cot{grid-template-columns:1fr}
+  .ht-cong-doan{font-size:42px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="dau"><div class="dau-trong">
+  <div class="logo"><span class="logo-o" aria-hidden="true"></span><span class="logo-chu">Xưởng Video<small>Studio</small></span></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="studio">Studio</button>
+    <button role="tab" aria-selected="false" data-tab="duyet">Duyệt <span class="dem-duyet" id="demDuyet"></span></button>
+    <button role="tab" aria-selected="false" data-tab="thuvien">Thư viện</button>
+  </nav>
+  <div class="dau-phai">
+    <div class="tien"><div class="nhan" id="tienNhan">Claude tháng này</div><div class="so" id="tienThang">0đ</div></div>
+    <span class="den" id="denTrangThai"><i></i><span id="denChu">Rảnh</span></span>
+  </div>
+</div></header>
+
+<main class="giay">
+  <div id="canhKhoa" class="canh-khoa" hidden>Đang đặt <code>XV_CLAUDE=api</code> nhưng chưa có <code>ANTHROPIC_API_KEY</code> trong <code>config.env</code>. Đổi về <code>XV_CLAUDE=cli</code> để dùng gói Claude Code trên máy.</div>
+  <div id="tamDung" class="bang-dung" hidden>
+    <span class="den cho"><i></i>Tạm dừng</span>
+    <p id="tamDungChu"></p>
+    <button class="nut chinh" id="nutTiepTuc">Hạn mức đã mở, chạy tiếp</button>
+  </div>
+
+  <!-- ══ STUDIO ══ -->
+  <section id="tab-studio">
+    <div class="san-khau">
+      <div class="man-hinh" id="manHinh">
+        <span class="mh-rec" id="mhRec"><i></i><span>REC</span></span>
+        <div id="mhNoiDung"></div>
+        <span class="mh-nguon" id="mhNguon" hidden></span>
+        <span class="mh-tc" id="mhTc">00:00:00</span>
+      </div>
+
+      <div class="tam tam-than hien-tai" id="hienTai"></div>
+    </div>
+
+    <div class="tam tl">
+      <div class="tl-dau">
+        <span class="nhan">Dòng thời gian sản xuất</span>
+        <span class="so" id="tlTong"></span>
+      </div>
+      <div class="tl-khung"><div class="tl-ray" id="tlRay"></div></div>
+    </div>
+
+    <div class="hang-duoi">
+      <div class="tam">
+        <div class="tam-dau"><span class="nhan">Thêm chủ đề</span><span class="ghi">mỗi dòng một video · sau dấu <b>|</b> là người xem</span></div>
+        <div class="tam-than">
+          <textarea class="o-nhap" id="oChuDe" placeholder="12 thói quen tiền bạc giữ lại hàng chục triệu mỗi tháng | người đi làm lương 15 triệu
+10 thứ người giàu không bao giờ mua | người hay mua theo cảm xúc"></textarea>
+          <div class="hang" style="margin-top:12px">
+            <select class="o-chon" id="oPhut" aria-label="Độ dài video">
+              <option value="1">1 phút · thử máy</option><option value="10">10 phút</option><option value="20">20 phút</option>
+              <option value="25">25 phút</option><option value="30" selected>30 phút · ăn view nhất</option><option value="35">35 phút</option>
+            </select>
+            <span style="flex:1"></span>
+            <button class="nut" id="nutThem">Thêm vào hàng chờ</button>
+            <button class="nut chinh" id="nutThemChay">Thêm &amp; sản xuất ngay</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tam">
+        <div class="tam-dau"><span class="nhan">Hàng chờ &amp; video đang làm</span><span class="ghi" id="demHang"></span></div>
+        <ul class="ds-video" id="dsVideo"></ul>
+        <div class="trong" id="trongVideo" hidden>Chưa có video nào. Dán một chủ đề bên trái để bắt đầu.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ DUYỆT ══ -->
+  <section id="tab-duyet" hidden>
+    <div class="chon-duyet" id="dsDuyet"></div>
+    <div id="khungDuyet"></div>
+  </section>
+
+  <!-- ══ THƯ VIỆN ══ -->
+  <section id="tab-thuvien" hidden>
+    <div class="kho-dau" id="khoDau"></div>
+    <div class="luoi" id="luoiThuVien"></div>
+    <div class="trong tam" id="trongThuVien" hidden>Chưa có video nào qua cổng duyệt video. Video duyệt xong sẽ nằm ở đây, sẵn sàng tải về đăng.</div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ── Công đoạn: tên theo nghề làm phim, thời lượng mặc định đo thật cho video 30 phút ──
+  var BUOC = [
+    { so:1, ten:"Nghiên cứu",  ky:"tien", giay:150 },
+    { so:2, ten:"Kịch bản",    ky:"tien", giay:450 },
+    { so:3, ten:"Phân cảnh",   ky:"sx",   giay:500 },
+    { so:4, ten:"Thu âm",      ky:"sx",   giay:2000, theoDoDai:true },
+    { so:5, ten:"Minh hoạ",    ky:"sx",   giay:450,  theoDoDai:true },
+    { so:6, ten:"Dựng phim",   ky:"hk",   giay:650,  theoDoDai:true },
+    { so:7, ten:"Phụ đề",      ky:"hk",   giay:20 },
+    { so:8, ten:"Tiêu đề",     ky:"hk",   giay:70 },
+    { so:9, ten:"Thumbnail",   ky:"hk",   giay:25 },
+    { so:10, ten:"Shorts",     ky:"hk",   giay:420 }
+  ];
+  var KY = { tien:"Tiền kỳ", sx:"Sản xuất", hk:"Hậu kỳ" };
+  var TEN_BUOC = {}; BUOC.forEach(function(b){ TEN_BUOC[b.so] = b.ten; });
+
+  var st = { tab:"studio", td:null, chiTiet:{}, chiTietLuc:{}, moDuyet:null, dangTaiCT:{}, khungMonitor:"" };
+
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function usd(n){ return "$" + Number(n || 0).toFixed(2).replace(".", ","); }
+  function tc(giay){
+    giay = Math.max(0, Math.round(giay || 0));
+    var h = Math.floor(giay / 3600), m = Math.floor(giay % 3600 / 60), s = giay % 60;
+    return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+  function ngan(giay){
+    giay = Math.max(0, Math.round(giay || 0));
+    if (giay < 60) return giay + " giây";
+    var m = Math.round(giay / 60);
+    return m < 60 ? m + " phút" : Math.floor(m / 60) + " giờ " + (m % 60) + " phút";
+  }
+  // Ký hiệu bảng clapper cho chỗ chật: 28′ = 28 phút, 20″ = 20 giây, 1h05′
+  function gon(giay){
+    giay = Math.max(0, Math.round(giay || 0));
+    if (giay < 60) return giay + "″";
+    var m = Math.round(giay / 60);
+    return m < 60 ? m + "′" : Math.floor(m / 60) + "h" + String(m % 60).padStart(2, "0") + "′";
+  }
+  function gioPhut(ms){ var d = new Date(ms); return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); }
+  function phutVideo(g){ if(!g) return "—"; var m = Math.floor(g/60), s = Math.round(g%60); return m + ":" + String(s).padStart(2,"0"); }
+  // "2026-09-13 12:11:24" (giờ máy) → ms
+  function docGio(chu){ if(!chu) return null; var t = Date.parse(String(chu).replace(" ", "T")); return isNaN(t) ? null : t; }
+
+  async function api(m, url, body){
+    var r = await fetch(url, { method:m, headers:{"content-type":"application/json"}, body: body ? JSON.stringify(body) : undefined });
+    var j = await r.json().catch(function(){ return {}; });
+    if (!r.ok) throw new Error(j.loi || ("HTTP " + r.status));
+    return j;
+  }
+  function bao(msg){ alert(msg); }
+
+  // ── tab ──
+  document.querySelector(".tabs").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-tab]"); if (!b) return;
+    moTab(b.dataset.tab);
+  });
+  function moTab(t){
+    st.tab = t;
+    document.querySelectorAll(".tabs button").forEach(function(x){ x.setAttribute("aria-selected", String(x.dataset.tab === t)); });
+    ["studio","duyet","thuvien"].forEach(function(k){ $("tab-" + k).hidden = k !== t; });
+    ve();
+  }
+
+  // ── dữ liệu ──
+  var dangPoll = false;
+  async function poll(){
+    if (dangPoll) return; dangPoll = true;
+    try {
+      st.td = await api("GET", "/api/tien-do");
+      var v = videoTrongTam();
+      if (v) await taiChiTiet(v.id, 2500);
+      ve();
+    } catch(x) {
+      // Không nuốt im: lỗi vẽ mà giấu đi thì màn hình đứng hình không ai biết vì sao. Mỗi lỗi chỉ in một lần.
+      var m = String(x && x.stack || x);
+      if (m !== st.loiCuoi) { st.loiCuoi = m; console.error("[studio] " + m); }
+    }
+    dangPoll = false;
+  }
+  function taiChiTiet(id, cuMs){
+    // Đang tải dở → trả về chính lượt tải đó, người gọi await được dữ liệu mới thay vì nhận tay không
+    if (st.dangTaiCT[id]) return st.dangTaiCT[id];
+    if (cuMs && st.chiTietLuc[id] && Date.now() - st.chiTietLuc[id] < cuMs) return Promise.resolve();
+    st.dangTaiCT[id] = (async function(){
+      try { st.chiTiet[id] = await api("GET", "/api/video/" + id); st.chiTietLuc[id] = Date.now(); }
+      finally { st.dangTaiCT[id] = null; }
+    })();
+    return st.dangTaiCT[id];
+  }
+
+  // Video được đưa lên màn hình studio: đang chạy › chờ anh duyệt › đầu hàng chờ › mới nhất
+  function videoTrongTam(){
+    var d = st.td; if (!d || !d.video.length) return null;
+    if (d.dang_chay) return d.video.find(function(v){ return v.id === d.dang_chay.videoId; }) || null;
+    var cho = d.video.filter(function(v){ return v.trang_thai.indexOf("CHO_DUYET") === 0; });
+    if (cho.length) return cho[0];
+    if (d.hang_doi && d.hang_doi.length) return d.video.find(function(v){ return v.id === d.hang_doi[0]; }) || null;
+    return d.video[0];
+  }
+
+  // ── tính tiến độ ─────────────────────────────────────────────
+  // Tiến độ TRONG một công đoạn, đọc từ dòng chi tiết server gửi ("giọng 45/147", "mục 4–6/14"…)
+  function tienTrongBuoc(so, chu){
+    chu = String(chu || "");
+    var m = chu.match(/(\d+)\s*[–-]\s*(\d+)\s*\/\s*(\d+)/);
+    var n = chu.match(/(\d+)\s*\/\s*(\d+)/);
+    var tu = null, tong = null, xong = 0;
+    if (m) { tu = +m[1]; tong = +m[3]; xong = tu - 1; }
+    else if (n) { xong = +n[1]; tong = +n[2]; }
+    var ti = tong ? Math.min(1, xong / tong) : 0;
+    if (so === 2 && /dàn ý/.test(chu)) ti = .05;
+    if (so === 4 && /nạp giọng/.test(chu)) ti = .01;
+    if (so === 5) { if (/^vẽ/.test(chu)) ti = .6 * ti; else if (/^render/.test(chu)) ti = .6 + .4 * ti; }
+    return { ti: ti, xong: xong, tong: tong, tu: tu };
+  }
+  function moTaChiTiet(so, chu){
+    chu = String(chu || ""); if (!chu) return "đang khởi động…";
+    var p = tienTrongBuoc(so, chu);
+    if (so === 2 && /dàn ý/.test(chu)) return "đang lập dàn ý";
+    if ((so === 2 || so === 3) && p.tu) return "đang viết mục " + chu.match(/\d+\s*[–-]\s*\d+/)[0] + " trên " + p.tong;
+    if (so === 4 && /nạp giọng/.test(chu)) return "đã nạp giọng anh, bắt đầu thu";
+    if (so === 4 && p.tong) return "đang thu đoạn " + p.xong + " / " + p.tong;
+    if (so === 5 && /^vẽ/.test(chu)) return "đang vẽ cảnh minh hoạ " + p.xong + " / " + p.tong;
+    if (so === 5 && /^render/.test(chu)) return "đang ghép chữ lên khung hình " + p.xong + " / " + p.tong;
+    if (so === 6 && p.tong) return "đang dựng đoạn " + p.xong + " / " + p.tong;
+    return chu;
+  }
+
+  // Trạng thái & thời lượng từng công đoạn của một video
+  function lapTimeline(v, ct, d){
+    var dc = d.dang_chay && d.dang_chay.videoId === v.id ? d.dang_chay : null;
+    var dungO = d.tam_dung && !dc && d.hang_doi && d.hang_doi[0] === v.id ? v.buoc_hien_tai : null;
+    var tiLe = (v.phut || 30) / 30;
+    var rec = {}; (ct && ct.buoc || []).forEach(function(b){ rec[b.so] = b; });
+    var soDang = dc ? dc.buoc : null;
+    var qua = ["hang_doi", "da_dang"].indexOf(v.trang_thai) >= 0;
+
+    return BUOC.map(function(b){
+      var r = rec[b.so];
+      var uoc = b.theoDoDai ? b.giay * tiLe : b.giay;
+      var o = { so:b.so, ten:b.ten, ky:b.ky, trang:"cho", giay:uoc, ti:0, daChay:0, conLai:uoc, chiTiet:"" };
+      if (soDang != null) {
+        if (b.so < soDang) o.trang = r && r.trang_thai === "xong" ? "xong" : "cho";
+        else if (b.so === soDang) o.trang = "dang";
+      } else if (qua || v.trang_thai === "CHO_DUYET_VIDEO") {
+        o.trang = r && r.trang_thai === "xong" ? "xong" : "cho";
+      } else if (v.trang_thai === "loi" && b.so === v.buoc_hien_tai) {
+        o.trang = "loi";
+      } else if (dungO && b.so === dungO) {
+        o.trang = "dung";
+      } else if (b.so <= v.buoc_hien_tai && r && r.trang_thai === "xong" && v.trang_thai !== "moi") {
+        o.trang = "xong";
+      }
+      if (o.trang === "xong") { o.giay = r && r.giay > 0 ? r.giay : uoc; o.ti = 1; o.daChay = o.giay; o.conLai = 0; }
+      if (o.trang === "dang") {
+        var p = tienTrongBuoc(b.so, dc.chiTiet);
+        var batDau = r && r.trang_thai === "dang_chay" ? docGio(r.chay_luc) : null;
+        o.daChay = batDau ? Math.max(0, (Date.now() - batDau) / 1000) : 0;
+        o.ti = p.ti; o.chiTiet = dc.chiTiet; o.p = p;
+        o.conLai = o.ti > .04 && o.daChay > 20 ? o.daChay * (1 - o.ti) / o.ti : Math.max(uoc - o.daChay, uoc * (1 - o.ti) * .5);
+        o.giay = Math.max(uoc, o.daChay + o.conLai);
+      }
+      return o;
+    });
+  }
+
+  function trangMoc(v, soMoc){
+    var t = v.trang_thai;
+    if (soMoc === 1) {
+      if (t === "CHO_DUYET_KICH_BAN") return "cho";
+      if (v.buoc_hien_tai >= 3 || t === "kich_ban_duyet" || t === "CHO_DUYET_VIDEO" || t === "hang_doi" || t === "da_dang") return "da";
+      return "sap";
+    }
+    if (t === "CHO_DUYET_VIDEO") return "cho";
+    if (t === "hang_doi" || t === "da_dang") return "da";
+    return "sap";
+  }
+
+  // ── vẽ ───────────────────────────────────────────────────────
+  function ve(){
+    var d = st.td; if (!d) return;
+    $("canhKhoa").hidden = d.cfg.co_khoa;
+    var cli = d.cfg.nguon_claude === "cli";
+    $("tienNhan").textContent = cli ? "Claude tháng này · quy đổi" : "Tiền API tháng này";
+    $("tienThang").textContent = cli ? usd(d.chi_phi_thang.usd_quy_doi) + " · thật 0đ" : usd(d.chi_phi_thang.usd);
+
+    var choDuyet = d.video.filter(function(v){ return v.trang_thai.indexOf("CHO_DUYET") === 0; });
+    $("demDuyet").textContent = choDuyet.length || "";
+
+    // đèn tổng
+    var den = $("denTrangThai"), denChu = $("denChu");
+    den.className = "den";
+    if (d.dang_chay) { den.classList.add("song"); denChu.textContent = "Đang sản xuất"; }
+    else if (d.tam_dung) { den.classList.add("cho"); denChu.textContent = "Tạm dừng"; }
+    else if (choDuyet.length) { den.classList.add("cho"); denChu.textContent = "Chờ anh duyệt"; }
+    else denChu.textContent = "Rảnh";
+
+    if (d.tam_dung) {
+      $("tamDung").hidden = false;
+      $("tamDungChu").textContent = d.tam_dung.ly_do + (d.hang_doi.length ? " · " + d.hang_doi.length + " video đang chờ trong hàng." : "");
+    } else $("tamDung").hidden = true;
+
+    if (st.tab === "studio") veStudio(d);
+    if (st.tab === "duyet") veDuyet(d, choDuyet);
+    if (st.tab === "thuvien") veThuVien(d);
+  }
+
+  // ── STUDIO ──
+  function veStudio(d){
+    var v = videoTrongTam();
+    var ct = v ? st.chiTiet[v.id] : null;
+    var tl = v ? lapTimeline(v, ct, d) : [];
+    veHienTai(d, v, tl);
+    veTimeline(v, tl);
+    veMonitor(d, v, tl, ct);
+    veDanhSach(d, v);
+  }
+
+  function veHienTai(d, v, tl){
+    var k = $("hienTai");
+    if (!v) {
+      k.innerHTML = '<div class="trong-studio"><span class="nhan">Studio đang rảnh</span><h2>Chưa có gì trên bàn dựng</h2>' +
+        '<p>Dán một chủ đề ở ô bên dưới rồi bấm Thêm &amp; sản xuất ngay. Máy tự chạy tới lúc cần anh duyệt kịch bản.</p></div>';
+      return;
+    }
+    var dang = tl.find(function(o){ return o.trang === "dang"; });
+    var loi = tl.find(function(o){ return o.trang === "loi"; });
+    var dung = tl.find(function(o){ return o.trang === "dung"; });
+    var dauHtml = '<div class="ht-ten-video">Đang làm · <b>' + e(v.tieu_de) + '</b> · ' + (v.phut || 30) + ' phút</div>';
+    var html = "";
+    if (!dang) st.khoaHT = null;
+
+    if (dang) {
+      // Cùng công đoạn, cùng mốc tiến độ → chỉ nhảy đồng hồ; vẽ lại cả khối sẽ làm vạch sọc thanh tiến độ giật mỗi giây
+      var khoaHT = v.id + "|" + dang.so + "|" + dang.chiTiet;
+      if (st.khoaHT === khoaHT && $("htDaChay")) { $("htDaChay").textContent = tc(dang.daChay); return; }
+      st.khoaHT = khoaHT;
+      var sau = tl.filter(function(o){ return o.so > dang.so; });
+      var denMoc = dang.so <= 2 ? sau.filter(function(o){ return o.so <= 2; }) : sau;
+      var conLaiMoc = dang.conLai + denMoc.reduce(function(s, o){ return s + o.giay; }, 0);
+      var tenMoc = dang.so <= 2 ? "duyệt kịch bản" : "duyệt video";
+      html = dauHtml +
+        '<div class="nhan" style="margin-top:18px">' + KY[dang.ky] + ' · công đoạn ' + dang.so + ' / 9</div>' +
+        '<div class="ht-cong-doan">' + e(dang.ten) + '</div>' +
+        '<div class="ht-chi-tiet" id="htChiTiet">' + e(moTaChiTiet(dang.so, dang.chiTiet)) + '</div>' +
+        '<div class="ht-thanh song" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(dang.ti*100) + '"><i id="htThanh" style="width:' + (dang.ti*100).toFixed(1) + '%"></i></div>' +
+        '<div class="ht-so"><span class="ht-phan-tram" id="htPhanTram">' + Math.round(dang.ti*100) + '%</span>' +
+        '<span class="ht-dem">' + (dang.p && dang.p.tong ? (dang.p.xong + " / " + dang.p.tong) : "") + '</span></div>' +
+        '<div class="ht-gio">' +
+          '<div><span class="nhan">Đã chạy</span><span class="so" id="htDaChay">' + tc(dang.daChay) + '</span></div>' +
+          '<div><span class="nhan">Còn công đoạn này</span><span class="so">~' + ngan(dang.conLai) + '</span></div>' +
+          '<div><span class="nhan">Tới lúc ' + tenMoc + '</span><span class="so">~' + gioPhut(Date.now() + conLaiMoc * 1000) + '</span></div>' +
+        '</div>' +
+        '<div class="ht-tiep">Tiếp theo: ' + (denMoc.length ? denMoc.map(function(o){ return '<b>' + e(o.ten) + '</b>'; }).join(' → ') + ' → ' : '') +
+          '<b style="color:var(--ho-phach)">anh ' + tenMoc + '</b></div>';
+    } else if (v.trang_thai === "CHO_DUYET_KICH_BAN" || v.trang_thai === "CHO_DUYET_VIDEO") {
+      var laKB = v.trang_thai === "CHO_DUYET_KICH_BAN";
+      html = dauHtml +
+        '<div class="nhan" style="margin-top:18px;color:var(--ho-phach)">Máy đã dừng · tới lượt anh</div>' +
+        '<div class="ht-cong-doan" style="color:var(--ho-phach)">' + (laKB ? "Duyệt kịch bản" : "Duyệt video") + '</div>' +
+        '<div class="ht-chi-tiet">' + (laKB ? "Đọc và sửa kịch bản trước khi máy thu âm, vẽ tranh và dựng phim." : "Xem thử bản dựng, chọn tiêu đề rồi đưa vào hàng đợi đăng.") + '</div>' +
+        '<div class="ht-thanh xong"><i style="width:' + (laKB ? 22 : 100) + '%"></i></div>' +
+        '<div class="ht-hanh-dong"><button class="nut chinh" data-mo-duyet="' + v.id + '">' + (laKB ? "Mở kịch bản để duyệt" : "Mở video để duyệt") + '</button></div>';
+    } else if (loi) {
+      html = dauHtml +
+        '<div class="nhan" style="margin-top:18px;color:#FF8A8A">Dừng vì lỗi · công đoạn ' + loi.so + ' / 9</div>' +
+        '<div class="ht-cong-doan" style="color:#FF8A8A">' + e(loi.ten) + '</div>' +
+        '<div class="ht-chi-tiet">' + e(v.loi || "Không rõ lỗi") + '</div>' +
+        '<div class="ht-hanh-dong"><button class="nut chinh" data-chay="' + v.id + '">Chạy lại công đoạn ' + loi.so + '</button>' +
+        '<span class="ghi">Các công đoạn trước giữ nguyên, không làm lại.</span></div>';
+    } else if (dung) {
+      html = dauHtml +
+        '<div class="nhan" style="margin-top:18px;color:var(--ho-phach)">Tạm dừng · công đoạn ' + dung.so + ' / 9</div>' +
+        '<div class="ht-cong-doan" style="color:var(--ho-phach)">' + e(dung.ten) + '</div>' +
+        '<div class="ht-chi-tiet">Hết hạn mức — phần đã làm được giữ nguyên, bấm chạy tiếp khi hạn mức mở lại.</div>' +
+        '<div class="ht-thanh dung"><i style="width:100%"></i></div>';
+    } else if (v.trang_thai === "hang_doi" || v.trang_thai === "da_dang") {
+      html = dauHtml +
+        '<div class="nhan" style="margin-top:18px;color:var(--xanh)">Hoàn tất</div>' +
+        '<div class="ht-cong-doan" style="color:var(--xanh)">' + (v.trang_thai === "da_dang" ? "Đã đăng" : "Sẵn sàng đăng") + '</div>' +
+        '<div class="ht-chi-tiet">Video ' + phutVideo(v.thoi_luong_giay) + ' · ' + usd(v.quy_doi_usd) + ' quy đổi.</div>' +
+        '<div class="ht-thanh xong"><i style="width:100%"></i></div>' +
+        '<div class="ht-hanh-dong"><button class="nut" data-tab-mo="thuvien">Mở thư viện</button></div>';
+    } else {
+      var trongHang = d.hang_doi && d.hang_doi.indexOf(v.id) >= 0;
+      html = dauHtml +
+        '<div class="nhan" style="margin-top:18px">' + (trongHang ? "Đang xếp hàng" : "Chưa sản xuất") + '</div>' +
+        '<div class="ht-cong-doan">' + (trongHang ? "Chờ tới lượt" : "Sẵn sàng") + '</div>' +
+        '<div class="ht-chi-tiet">' + (trongHang ? "Máy làm từng video một, video này chạy ngay khi video trước xong." : "Bấm để máy bắt đầu từ công đoạn nghiên cứu.") + '</div>' +
+        (trongHang ? '' : '<div class="ht-hanh-dong"><button class="nut chinh" data-chay="' + v.id + '">Sản xuất video này</button></div>');
+    }
+    k.innerHTML = html;
+  }
+
+  var CO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+  var DAU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+  function veTimeline(v, tl){
+    var ray = $("tlRay");
+    if (!v) { ray.innerHTML = '<div class="ghi" style="padding:10px 0">Dòng thời gian hiện ra khi có video trên bàn dựng.</div>'; $("tlTong").textContent = ""; return; }
+    var nhom = { tien:[], sx:[], hk:[] };
+    tl.forEach(function(o){ nhom[o.ky].push(o); });
+    function clip(o){
+      var tgChu = o.trang === "xong" ? gon(o.giay) : o.trang === "dang" ? tc(o.daChay) + " · ~" + gon(o.giay) : o.trang === "loi" ? "lỗi" : o.trang === "dung" ? "tạm dừng" : "~" + gon(o.giay);
+      return '<div class="clip ' + o.trang + '" style="flex-grow:' + Math.max(1, Math.round(o.giay)) + '" title="' + e(o.ten + " · " + tgChu) + '">' +
+        '<i class="clip-fill" style="width:' + (o.ti * 100).toFixed(1) + '%"></i>' +
+        (o.trang === "dang" ? '<i class="dau-phat" style="left:' + (o.ti * 100).toFixed(1) + '%"></i>' : '') +
+        '<span class="clip-ten">' + e(o.ten) + '</span><span class="clip-tg">' + tgChu + '</span></div>';
+    }
+    function ky(k){
+      var ds = nhom[k], tong = ds.reduce(function(s, o){ return s + o.giay; }, 0);
+      var trang = ds.some(function(o){ return o.trang === "dang" || o.trang === "dung" || o.trang === "loi"; }) ? "dang" : ds.every(function(o){ return o.trang === "xong"; }) ? "xong" : "";
+      return '<div class="ky ' + trang + '" style="flex:' + Math.max(1, Math.round(tong)) + ' 1 0;min-width:' + (ds.length * 102) + 'px">' +
+        '<div class="ky-ten">' + KY[k] + '</div><div class="ky-clips">' + ds.map(clip).join("") + '</div></div>';
+    }
+    function moc(so, ten){
+      var t = trangMoc(v, so);
+      return '<div class="moc ' + t + '" title="' + e(ten) + '"><div class="moc-co" style="color:' + (t === "cho" ? "var(--ho-phach)" : t === "da" ? "var(--xanh)" : "var(--mo-2)") + '">' + (t === "da" ? DAU : CO) + '</div>' +
+        '<div class="moc-ten">' + ten.replace(" ", "<br>") + '</div></div>';
+    }
+    ray.innerHTML = ky("tien") + moc(1, "Duyệt kịch bản") + ky("sx") + ky("hk") + moc(2, "Duyệt video");
+
+    var daChay = tl.reduce(function(s, o){ return s + (o.trang === "xong" ? o.giay : o.trang === "dang" ? o.daChay : 0); }, 0);
+    var tong = tl.reduce(function(s, o){ return s + o.giay; }, 0);
+    $("tlTong").innerHTML = 'máy đã chạy <b>' + tc(daChay) + '</b> · tổng ước tính <b>' + tc(tong) + '</b>';
+  }
+
+  function veMonitor(d, v, tl, ct){
+    var rec = $("mhRec"), noi = $("mhNoiDung"), nguon = $("mhNguon");
+    var dang = tl.find(function(o){ return o.trang === "dang"; });
+    rec.className = "mh-rec" + (dang ? " song" : "");
+    rec.querySelector("span").textContent = dang ? "REC" : (v && v.trang_thai.indexOf("CHO_DUYET") === 0 ? "STANDBY" : "IDLE");
+    var daChay = tl.reduce(function(s, o){ return s + (o.trang === "xong" ? o.giay : o.trang === "dang" ? o.daChay : 0); }, 0);
+    $("mhTc").textContent = tc(daChay);
+
+    var khoa = "", html = "", nhanNguon = "";
+    if (v && dang && dang.so === 4) {
+      khoa = "thu-am";
+      html = '<div class="thu-am"><div class="thu-am-cot">' +
+        [0,1,2,3,4,5,6,7,8,9,10,11,12,13].map(function(i){ return '<i style="animation-delay:-' + (i * .13).toFixed(2) + 's;animation-duration:' + (0.8 + (i % 5) * .12).toFixed(2) + 's"></i>'; }).join("") +
+        '</div><p>Đang thu âm bằng giọng anh</p></div>';
+    } else if (v && dang && dang.so === 5 && /^render/.test(dang.chiTiet || "") && dang.p && dang.p.xong > 0) {
+      // Khung hình vừa ghép xong — cập nhật theo số thứ tự, không nháy lại ảnh khi số không đổi
+      var so = String(dang.p.xong).padStart(3, "0");
+      khoa = "khung-" + v.ma + "-" + so;
+      html = '<img alt="Khung hình vừa dựng" src="/ra/' + e(v.ma) + '/hinh/' + so + '.png?v=' + so + '">';
+      nhanNguon = "khung " + dang.p.xong + " / " + dang.p.tong;
+    } else if (v && ct && ct.co && ct.co.thumbnail && !dang && (v.trang_thai === "CHO_DUYET_VIDEO" || v.trang_thai === "hang_doi" || v.trang_thai === "da_dang")) {
+      khoa = "thumb-" + v.ma + "-" + (st.chiTietLuc[v.id] ? Math.floor(st.chiTietLuc[v.id] / 60000) : 0);
+      html = '<img alt="Thumbnail" src="/ra/' + e(v.ma) + '/thumbnail.png?v=' + khoa + '">';
+      nhanNguon = "thumbnail";
+    } else {
+      var b = dang || tl.find(function(o){ return o.trang === "loi" || o.trang === "dung"; });
+      khoa = "clap-" + (v ? v.id : 0) + "-" + (b ? b.so + (b.p ? "-" + b.p.xong : "") : v ? v.trang_thai : "trong");
+      html = '<div class="clapper"><div class="clapper-o"><div class="clapper-soc"></div>' +
+        '<div class="clapper-luoi">' +
+          '<div><span class="nhan">Công đoạn</span><span class="so">' + (b ? String(b.so).padStart(2, "0") : "—") + '</span></div>' +
+          '<div><span class="nhan">Tiến độ</span><span class="so">' + (b && b.p && b.p.tong ? b.p.xong + "/" + b.p.tong : b ? Math.round(b.ti * 100) + "%" : "—") + '</span></div>' +
+          '<div><span class="nhan">Độ dài</span><span class="so">' + (v ? (v.phut || 30) + "′" : "—") + '</span></div>' +
+        '</div><div class="clapper-ten">' + (v ? e(v.tieu_de) : "Chưa có cảnh quay") + '</div></div></div>';
+    }
+    if (khoa !== st.khungMonitor) { noi.innerHTML = html; st.khungMonitor = khoa; }
+    nguon.hidden = !nhanNguon; nguon.textContent = nhanNguon;
+  }
+
+  var CHIP = function(v, d){
+    var dc = d.dang_chay && d.dang_chay.videoId === v.id;
+    var trongHang = d.hang_doi && d.hang_doi.indexOf(v.id) >= 0;
+    if (dc) return '<span class="chip song"><i></i>' + e(TEN_BUOC[d.dang_chay.buoc] || "Đang làm") + '</span>';
+    if (trongHang && d.tam_dung) return '<span class="chip cho"><i></i>Tạm dừng</span>';
+    if (trongHang) return '<span class="chip"><i></i>Xếp hàng</span>';
+    var t = v.trang_thai;
+    if (t === "CHO_DUYET_KICH_BAN") return '<span class="chip cho"><i></i>Chờ duyệt kịch bản</span>';
+    if (t === "CHO_DUYET_VIDEO") return '<span class="chip cho"><i></i>Chờ duyệt video</span>';
+    if (t === "hang_doi") return '<span class="chip xong"><i></i>Sẵn sàng đăng</span>';
+    if (t === "da_dang") return '<span class="chip xong"><i></i>Đã đăng</span>';
+    if (t === "loi") return '<span class="chip loi"><i></i>Lỗi ở ' + e(TEN_BUOC[v.buoc_hien_tai] || "bước " + v.buoc_hien_tai) + '</span>';
+    if (t === "moi") return '<span class="chip"><i></i>Chưa sản xuất</span>';
+    return '<span class="chip"><i></i>Dừng sau ' + e(TEN_BUOC[v.buoc_hien_tai] || "bước " + v.buoc_hien_tai) + '</span>';
+  };
+
+  function veDanhSach(d, dangXem){
+    var ds = d.video;
+    $("trongVideo").hidden = !!ds.length;
+    $("demHang").textContent = ds.length ? ds.length + " video" : "";
+    $("dsVideo").innerHTML = ds.map(function(v){
+      var dc = d.dang_chay && d.dang_chay.videoId === v.id;
+      var trongHang = d.hang_doi && d.hang_doi.indexOf(v.id) >= 0;
+      var nut = "";
+      if (!dc && !trongHang) {
+        if (v.trang_thai === "moi") nut += '<button class="nut nho chinh" data-a="chay" data-id="' + v.id + '">Sản xuất</button>';
+        else if (v.trang_thai === "loi") nut += '<button class="nut nho chinh" data-a="chay" data-id="' + v.id + '">Chạy lại ' + e(TEN_BUOC[v.buoc_hien_tai] || "") + '</button>';
+        else if (v.trang_thai.indexOf("CHO_DUYET") === 0) nut += '<button class="nut nho chinh" data-a="duyet" data-id="' + v.id + '">Duyệt</button>';
+        if (v.buoc_hien_tai > 0 && v.trang_thai !== "moi") {
+          nut += '<select class="nut nho" data-a="chay-lai" data-id="' + v.id + '" aria-label="Làm lại từ công đoạn"><option value="">Làm lại từ…</option>' +
+            BUOC.filter(function(b){ return b.so <= Math.max(v.buoc_hien_tai, 1); }).map(function(b){ return '<option value="' + b.so + '">' + b.so + ' · ' + b.ten + '</option>'; }).join("") + '</select>';
+        }
+        nut += '<button class="nut nho nguy" data-a="xoa" data-id="' + v.id + '" aria-label="Xoá video">Xoá</button>';
+      }
+      return '<li class="' + (dangXem && dangXem.id === v.id ? "dang-xem" : "") + '">' +
+        '<span class="dv-so">#' + v.id + '</span>' +
+        '<div style="min-width:0"><div class="dv-ten">' + e(v.tieu_de) + '</div>' +
+          '<div class="dv-phu">' + CHIP(v, d) + ' &nbsp; ' + (v.phut || 30) + ' phút' + (v.thoi_luong_giay ? ' · ra ' + phutVideo(v.thoi_luong_giay) : '') + ' · ' + usd(v.quy_doi_usd) + (v.goc_nhin ? ' · ' + e(v.goc_nhin) : '') + '</div>' +
+          (v.loi && v.trang_thai === "loi" ? '<div class="dv-loi">' + e(v.loi) + '</div>' : '') +
+        '</div>' +
+        '<div class="dv-nut">' + nut + '</div></li>';
+    }).join("");
+  }
+
+  // ── thêm chủ đề ──
+  async function them(chayLuon){
+    var dong = $("oChuDe").value.trim();
+    if (!dong) return bao("Chưa có chủ đề nào. Mỗi dòng là một video.");
+    try { await api("POST", "/api/chu-de", { dong: dong, phut: $("oPhut").value, chay_luon: chayLuon }); $("oChuDe").value = ""; await poll(); }
+    catch(x) { bao(x.message); }
+  }
+  $("nutThem").onclick = function(){ them(false); };
+  $("nutThemChay").onclick = function(){ them(true); };
+  $("nutTiepTuc").onclick = async function(){ try { await api("POST", "/api/tiep-tuc"); poll(); } catch(x) { bao(x.message); } };
+
+  // Một bộ nghe bấm chung cho cả trang (nút trong danh sách + bảng hiện tại)
+  document.addEventListener("click", async function(ev){
+    var b = ev.target.closest("[data-a],[data-chay],[data-mo-duyet],[data-tab-mo]"); if (!b) return;
+    try {
+      if (b.dataset.tabMo) return moTab(b.dataset.tabMo);
+      if (b.dataset.moDuyet) { st.moDuyet = +b.dataset.moDuyet; return moTab("duyet"); }
+      if (b.dataset.chay) { await api("POST", "/api/video/" + b.dataset.chay + "/chay"); return poll(); }
+      var id = +b.dataset.id;
+      if (b.dataset.a === "chay") await api("POST", "/api/video/" + id + "/chay");
+      if (b.dataset.a === "xoa") { if (!confirm("Xoá video #" + id + " cùng toàn bộ file đã làm?")) return; await api("DELETE", "/api/video/" + id); }
+      if (b.dataset.a === "duyet") { st.moDuyet = id; return moTab("duyet"); }
+      poll();
+    } catch(x) { bao(x.message); }
+  });
+  document.addEventListener("change", async function(ev){
+    var s = ev.target.closest("select[data-a='chay-lai']"); if (!s || !s.value) return;
+    var so = s.value; s.value = "";
+    if (!confirm("Làm lại video #" + s.dataset.id + " từ công đoạn " + so + " · " + TEN_BUOC[so] + "? Các công đoạn sau cũng làm lại.")) return;
+    try { await api("POST", "/api/video/" + s.dataset.id + "/chay-lai/" + so); poll(); } catch(x) { bao(x.message); }
+  });
+
+  // ── DUYỆT ──
+  function veDuyet(d, cho){
+    $("dsDuyet").innerHTML = cho.length ? cho.map(function(v){
+      return '<button data-mo="' + v.id + '" aria-pressed="' + (st.moDuyet === v.id) + '">' + CHIP(v, d) + '<span class="dv-ten">' + e(v.tieu_de) + '</span></button>';
+    }).join("") : '<div class="tam trong" style="width:100%">Không có gì chờ duyệt. Máy sẽ dừng lại ở đây khi kịch bản hoặc video cần anh xem.</div>';
+    if (!st.moDuyet && cho.length) st.moDuyet = cho[0].id;
+    var vMo = cho.find(function(v){ return v.id === st.moDuyet; });
+    if (st.moDuyet && !vMo) { st.moDuyet = null; $("khungDuyet").innerHTML = ""; $("khungDuyet").dataset.id = ""; return; }
+    var k = $("khungDuyet");
+    if (vMo && (k.dataset.id !== String(vMo.id) || k.dataset.tt !== vMo.trang_thai) && !st.dangVeKhung) taiVaVeKhung(vMo.id);
+  }
+  $("dsDuyet").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-mo]"); if (!b) return;
+    st.moDuyet = +b.dataset.mo; $("khungDuyet").dataset.id = ""; ve();
+  });
+  async function taiVaVeKhung(id){
+    st.dangVeKhung = true;
+    try { st.chiTietLuc[id] = 0; await taiChiTiet(id); veKhungDuyet(st.chiTiet[id]); }
+    catch(x) { bao(x.message); }
+    finally { st.dangVeKhung = false; }
+  }
+  // Shorts cắt từ video dài — mỗi cái một khung dọc + bản dán
+  function khoiShorts(c, ma){
+    var ds = c.shorts || [];
+    if (!ds.length) return '';
+    return '<div class="muc-duyet" style="margin-top:18px"><span class="nhan">Shorts · ' + ds.length + ' video dọc · <a href="/ra/' + e(ma) + '/shorts/DAN-VAO-YOUTUBE.txt" target="_blank">bản dán tiêu đề/mô tả</a></span>' +
+      '<div class="hang-shorts">' + ds.map(function(x){
+        var f = "/ra/" + e(ma) + "/" + e(x.file);
+        return '<div class="the-short"><video controls preload="metadata" src="' + f + '"></video><div class="ghi">' + x.so + ' · ' + e(x.tieu_de || "") + ' · ' + (x.giay ? Math.round(x.giay) + 's' : '') + '</div></div>';
+      }).join("") + '</div></div>';
+  }
+  function logBuoc(buoc){
+    return '<div class="log-buoc">' + (buoc || []).map(function(b){
+      return '<span class="' + b.trang_thai + '">' + b.so + ' ' + e(TEN_BUOC[b.so]) + (b.giay ? ' · ' + ngan(b.giay) : '') + '</span>';
+    }).join("") + '</div>';
+  }
+  function veKhungDuyet(c){
+    var k = $("khungDuyet"); if (!c) return;
+    var v = c.video; k.dataset.id = v.id; k.dataset.tt = v.trang_thai;
+    if (v.trang_thai === "CHO_DUYET_KICH_BAN") {
+      var tu = (c.kich_ban || "").split(/\s+/).filter(Boolean).length;
+      var cb = c.canh_bao || [];
+      k.innerHTML = '<div class="tam">' +
+        '<div class="tam-dau"><div><div class="nhan" style="color:var(--ho-phach)">Cổng duyệt 1 · kịch bản</div><div style="font-size:18px;font-weight:500;margin-top:2px">' + e(v.tieu_de) + '</div></div>' +
+          '<div class="hang"><button class="nut" data-cl="2">Viết lại kịch bản</button><button class="nut" id="nutLuuKb">Lưu bản sửa</button><button class="nut chinh" id="nutDuyetKb">Duyệt · sản xuất tiếp</button></div></div>' +
+        '<div class="tam-than">' + logBuoc(c.buoc) +
+          (cb.length ? '<div class="soat"><b>Máy soát được ' + cb.length + ' điểm cần anh nhìn</b><ul>' +
+            cb.map(function(x){ return '<li><code>' + e(x.loai) + '</code> ' + e(x.chu) + (x.ghi ? ' <span class="ghi">— ' + e(x.ghi) + '</span>' : '') + '</li>'; }).join("") + '</ul></div>' : '') +
+          '<div class="hai-cot">' +
+            '<div><div class="hang" style="justify-content:space-between;margin-bottom:8px"><span class="nhan">Bản nghiên cứu · để soi số liệu</span></div><div class="doc">' + e(c.nghien_cuu || "(chưa có)") + '</div></div>' +
+            '<div><div class="hang" style="justify-content:space-between;margin-bottom:8px"><span class="nhan">Kịch bản · sửa thẳng, giữ các dòng “## ”</span><span class="ghi so"><span id="demTu">' + tu + '</span> từ ≈ <span id="demPhut">' + (tu / 195).toFixed(1) + '</span> phút</span></div>' +
+              '<textarea class="kb" id="oKichBan">' + e(c.kich_ban || "") + '</textarea></div>' +
+          '</div></div></div>';
+      $("oKichBan").addEventListener("input", function(){ var n = this.value.split(/\s+/).filter(Boolean).length; $("demTu").textContent = n; $("demPhut").textContent = (n / 195).toFixed(1); });
+      $("nutLuuKb").onclick = function(){ luuKb(false); };
+      $("nutDuyetKb").onclick = function(){ if (confirm("Duyệt kịch bản này? Máy sẽ phân cảnh, thu âm, vẽ minh hoạ và dựng phim.")) luuKb(true); };
+      k.querySelector("[data-cl]").onclick = async function(){
+        if (!confirm("Gọi Claude viết lại kịch bản từ bản nghiên cứu? Bản sửa tay sẽ mất.")) return;
+        await api("POST", "/api/video/" + v.id + "/chay-lai/2"); st.moDuyet = null; k.innerHTML = ""; k.dataset.id = ""; poll();
+      };
+    } else if (v.trang_thai === "CHO_DUYET_VIDEO") {
+      var s = c.sieu_du_lieu || { tieu_de:[v.tieu_de], mo_ta:"", tags:[] };
+      var ma = v.ma;
+      k.innerHTML = '<div class="tam">' +
+        '<div class="tam-dau"><div><div class="nhan" style="color:var(--ho-phach)">Cổng duyệt 2 · video</div><div style="font-size:18px;font-weight:500;margin-top:2px">' + e(v.tieu_de) + '</div></div>' +
+          '<div class="hang"><select class="nut" id="oChayLai" aria-label="Làm lại từ công đoạn"><option value="">Làm lại từ…</option>' +
+            BUOC.filter(function(b){ return b.so >= 3; }).map(function(b){ return '<option value="' + b.so + '">' + b.so + ' · ' + b.ten + '</option>'; }).join("") +
+          '</select><button class="nut chinh" id="nutDuyetVideo">Duyệt · đưa vào hàng đợi đăng</button></div></div>' +
+        '<div class="tam-than">' + logBuoc(c.buoc) +
+          '<div class="hai-cot" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">' +
+            '<div>' + (c.co.video ? '<video controls preload="metadata" src="/ra/' + e(ma) + '/video.mp4"></video>' : '<div class="doc">Chưa có video.mp4</div>') +
+              '<div class="ghi" style="margin-top:10px">' + phutVideo(v.thoi_luong_giay) + ' · ' + usd(v.quy_doi_usd) + ' quy đổi · <a href="/ra/' + e(ma) + '/phu-de.srt" target="_blank">phụ đề .srt</a> · <a href="/ra/' + e(ma) + '/kich-ban.md" target="_blank">kịch bản</a></div></div>' +
+            '<div>' + (c.co.thumbnail ? '<img class="thumb" alt="Thumbnail" src="/ra/' + e(ma) + '/thumbnail.png?t=' + Date.now() + '">' : '') +
+              '<div class="muc-duyet chon-td"><span class="nhan">Chọn tiêu đề</span>' + (s.tieu_de || []).map(function(t, i){
+                return '<label><input type="radio" name="td" value="' + e(t) + '"' + (i === 0 ? ' checked' : '') + '><span>' + e(t) + ' <span class="ghi so">' + t.length + ' ký tự</span></span></label>';
+              }).join("") + '</div>' +
+              '<div class="muc-duyet"><span class="nhan">Mô tả</span><div class="doc" style="max-height:200px">' + e(s.mo_ta || "") + '</div></div>' +
+              '<div class="muc-duyet"><span class="nhan">Tag</span><div class="the-tag">' + (s.tags || []).map(function(t){ return '<span>' + e(t) + '</span>'; }).join("") + '</div></div>' +
+            '</div></div>' + khoiShorts(c, ma) + '</div></div>';
+      $("oChayLai").onchange = async function(){
+        if (!this.value) return;
+        var so = this.value;
+        if (!confirm("Làm lại từ công đoạn " + so + " · " + TEN_BUOC[so] + "?")) { this.value = ""; return; }
+        await api("POST", "/api/video/" + v.id + "/chay-lai/" + so); st.moDuyet = null; k.innerHTML = ""; k.dataset.id = ""; poll();
+      };
+      $("nutDuyetVideo").onclick = async function(){
+        var td = (k.querySelector("input[name=td]:checked") || {}).value;
+        await api("POST", "/api/video/" + v.id + "/duyet", { tieu_de_chon: td });
+        st.moDuyet = null; k.innerHTML = ""; k.dataset.id = ""; poll();
+      };
+    } else {
+      k.innerHTML = '<div class="tam trong">Video #' + v.id + ' không còn chờ duyệt.</div>';
+    }
+  }
+  async function luuKb(duyet){
+    try {
+      await api("PUT", "/api/video/" + st.moDuyet + "/kich-ban", { kich_ban: $("oKichBan").value, duyet: duyet });
+      if (duyet) { st.moDuyet = null; $("khungDuyet").innerHTML = ""; $("khungDuyet").dataset.id = ""; moTab("studio"); }
+      else bao("Đã lưu bản sửa.");
+      poll();
+    } catch(x) { bao(x.message); }
+  }
+
+  // ── THƯ VIỆN = KHO ĐĂNG ──
+  function veThuVien(d){
+    var kho = d.kho || { muc: [], thu_muc: "" };
+    var ds = d.video.filter(function(v){ return v.trang_thai === "hang_doi" || v.trang_thai === "da_dang"; });
+    $("trongThuVien").hidden = !!ds.length;
+    var chua = kho.muc.filter(function(m){ return !m.youtube_id; });
+    var tiepShort = chua.filter(function(m){ return m.loai === "short"; })[0];
+    var tiepDai = chua.filter(function(m){ return m.loai === "dai"; })[0];
+    var tiepTikTok = kho.muc.filter(function(m){ return m.loai === "short" && !m.tiktok_id; })[0];
+    var daDang = kho.muc.length - chua.length;
+    $("khoDau").innerHTML =
+      '<div><div class="nhan">Kho đăng · YouTube ' + daDang + '/' + kho.muc.length + '</div><div class="duong">' + e(kho.thu_muc) + '</div></div>' +
+      '<div class="tiep">' + (tiepShort ? 'Short kế tiếp: <b>' + e(tiepShort.tieu_de) + '</b>' : 'Short: hết hàng') + '</div>' +
+      '<div class="tiep">' + (tiepDai ? 'Video dài kế tiếp: <b>' + e(tiepDai.tieu_de) + '</b>' : 'Video dài: hết hàng') + '</div>' +
+      '<div class="tiep">' + (tiepTikTok ? 'TikTok kế tiếp: <b>' + e(tiepTikTok.tieu_de) + '</b>' : 'TikTok: hết hàng') + '</div>';
+    $("luoiThuVien").innerHTML = ds.map(function(v){
+      var f = "/ra/" + e(v.ma) + "/";
+      var muc = kho.muc.filter(function(m){ return m.video_id === v.id; });
+      var dong = muc.map(function(m){
+        var ten = (m.loai === "dai" ? "Video dài" : "Short " + m.so) + " · " + (m.giay ? Math.round(m.giay) + "s" : "");
+        var yt = m.youtube_id
+            ? '<a class="tt xong" href="https://youtu.be/' + e(m.youtube_id) + '" target="_blank">YT ✓ ' + e((m.dang_luc || "").slice(5, 10)) + '</a><button class="nut nho" data-cd="' + m.id + '" title="Bỏ đánh dấu YouTube">↺</button>'
+            : '<button class="nut nho chinh" data-dd="' + m.id + '">Đã đăng YT</button>';
+        var tk = m.loai !== "short" ? '' : m.tiktok_id
+            ? '<span class="tt xong">TT ✓ ' + e((m.tiktok_luc || "").slice(5, 10)) + '</span><button class="nut nho" data-tc="' + m.id + '" title="Bỏ đánh dấu TikTok">↺</button>'
+            : '<button class="nut nho" data-td="' + m.id + '">Đã đăng TikTok</button>';
+        return '<div class="dong"><span class="ten" title="' + e(m.file) + '">' + e(ten) + ' — ' + e(m.tieu_de || "") + '</span>' + yt + tk + '</div>';
+      }).join("");
+      return '<article class="the">' +
+        '<div class="the-anh"><img alt="" loading="lazy" src="' + f + 'thumbnail.png"><span class="so">' + phutVideo(v.thoi_luong_giay) + '</span></div>' +
+        '<div class="the-than"><div class="the-ten">' + (v.so_kho ? '<span class="so">' + String(v.so_kho).padStart(2, "0") + '</span> · ' : '') + e(v.tieu_de) + '</div>' +
+          '<div class="dv-phu">' + CHIP(v, d) + ' &nbsp; ' + usd(v.quy_doi_usd) + '</div>' +
+          (muc.length ? '<div class="muc-kho">' + dong + '</div>' : '<div class="ghi" style="margin-top:8px">Chưa xuất kho</div>') +
+          '<div class="the-chan">' +
+            '<a class="nut nho" href="' + f + 'video.mp4" target="_blank">Xem video</a>' +
+            '<a class="nut nho" href="' + f + 'phu-de.srt" target="_blank">Phụ đề</a>' +
+            '<button class="nut nho" data-xk="' + v.id + '">' + (muc.length ? 'Xuất lại kho' : 'Xuất kho') + '</button>' +
+          '</div></div></article>';
+    }).join("");
+  }
+  $("luoiThuVien").addEventListener("click", async function(ev){
+    var b = ev.target.closest("button"); if (!b) return;
+    try {
+      if (b.dataset.dd) {
+        var yt = prompt("Dán link hoặc ID video YouTube (để trống nếu chỉ đánh dấu):", "");
+        if (yt === null) return;
+        var id = (yt.match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{6,})/) || [])[1] || yt.trim() || null;
+        await api("POST", "/api/kho/" + b.dataset.dd + "/da-dang", { youtube_id: id });
+      } else if (b.dataset.cd) {
+        if (!confirm("Bỏ đánh dấu đã đăng?")) return;
+        await api("POST", "/api/kho/" + b.dataset.cd + "/chua-dang");
+      } else if (b.dataset.td) {
+        var tt = prompt("Dán link TikTok (để trống nếu chỉ đánh dấu):", "");
+        if (tt === null) return;
+        await api("POST", "/api/kho/" + b.dataset.td + "/tiktok-da-dang", { tiktok_id: (tt.match(/video\/(\d+)/) || [])[1] || tt.trim() || "x" });
+      } else if (b.dataset.tc) {
+        if (!confirm("Bỏ đánh dấu đã đăng TikTok?")) return;
+        await api("POST", "/api/kho/" + b.dataset.tc + "/tiktok-chua-dang");
+      } else if (b.dataset.xk) {
+        var r = await api("POST", "/api/video/" + b.dataset.xk + "/xuat-kho");
+        bao("Đã xuất " + (r.kho && r.kho.muc ? r.kho.muc.length : 0) + " mục vào kho.");
+      }
+      poll();
+    } catch(x) { bao(x.message); }
+  });
+
+  // Đồng hồ: dữ liệu làm mới 1,5 giây/lần, còn mã thời gian chạy từng giây cho giống bàn dựng thật
+  setInterval(poll, 1500);
+  setInterval(function(){ if (st.td && st.tab === "studio" && st.td.dang_chay) veStudio(st.td); }, 1000);
+  poll();
+})();
+</script>
+</body>
+</html>

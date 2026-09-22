@@ -1,0 +1,12 @@
+{
+  "_ghi_chu": "Thẻ nhân vật kênh — máy đọc file này để giữ đúng MỘT nhân vật qua mọi tranh. Sửa khi đổi nhân vật; hai ảnh tham chiếu ở nhan-vat/chuan/ phải khớp mô tả. Các trường *_en viết TIẾNG ANH (lệnh cho máy vẽ), *_vi viết tiếng Việt (lệnh cho Claude viết cảnh).",
+  "goi_en": "the man",
+  "ta_vi": "một anh văn phòng trẻ người Việt",
+  "giu_en": "same face, same messy short black hair, same white shirt and warm amber-orange cardigan, dark trousers",
+  "dau_hieu_en": "the amber-orange cardigan",
+  "dau_hieu_vi": "áo len cam",
+  "mau_en": "orange",
+  "mau_vi": "cam",
+  "khong_them_en": "a backpack or a coffee cup",
+  "thumbnail_mac_dinh_en": "The man looks shocked with wide eyes and an open mouth, pointing to the left with one hand."
+}
