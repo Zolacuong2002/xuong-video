@@ -1,5 +1,6 @@
 # ── Riêng tư: không bao giờ lên git ──
 config.env
+.yt-token.json
 .apify.env
 .gemini.env
 cf-anh/.khoa.tmp

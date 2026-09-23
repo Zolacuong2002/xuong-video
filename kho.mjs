@@ -248,3 +248,36 @@ export function ghiDanhSach(cfg) {
   ghiChu(join(kho, "DANH-SACH.md"), md);
   return md;
 }
+
+/**
+ * Gom đúng dữ liệu để đăng một mục lên YouTube: file, tiêu đề, mô tả, thẻ, hình thu nhỏ, phụ đề, danh sách phát.
+ * Lấy từ nguồn gốc (ra/<video>/sieu-du-lieu.json, shorts/shorts.json) chứ không bóc lại file bản dán.
+ */
+export function duLieuDang(cfg, m) {
+  const video = layVideo(m.video_id);
+  if (!video) throw new Error("Không có video #" + m.video_id);
+  const tmRa = join(cfg.thuMucRa, video.ma);
+  const file = join(thuMucKho(cfg), m.file);
+  if (!existsSync(file)) throw new Error("Chưa có file trong kho: " + m.file + " (bấm Xuất lại kho)");
+
+  if (m.loai === "dai") {
+    const sdl = docJson(join(tmRa, "sieu-du-lieu.json")) || {};
+    const thumbnail = file.replace(/\.mp4$/i, "-thumbnail.png");
+    const srt = file.replace(/\.mp4$/i, "-vi.srt");
+    return {
+      file, tieu_de: m.tieu_de || sdl.tieu_de_chon || "", mo_ta: sdl.mo_ta || "", tags: sdl.tags || [],
+      thumbnail: existsSync(thumbnail) ? thumbnail : null,
+      srt: existsSync(srt) ? srt : null,
+      danh_sach_phat: m.danh_sach_phat || null,
+    };
+  }
+  const kb = docJson(join(tmRa, "shorts", "shorts.json")) || {};
+  const sh = (kb.shorts || [])[Number(m.so) - 1] || {};
+  return {
+    file, tieu_de: sh.tieu_de || m.tieu_de || "", mo_ta: sh.mo_ta || "", tags: sh.tags || [],
+    thumbnail: null,            // Shorts: YouTube lấy khung trong video, kênh không dùng hình thu nhỏ riêng
+    srt: null,                  // phụ đề đã cháy sẵn trong hình
+    danh_sach_phat: m.danh_sach_phat || null,
+    binh_luan_ghim: sh.binh_luan_ghim || "",
+  };
+}

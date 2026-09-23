@@ -6,7 +6,8 @@ import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, re
 import { join, extname, normalize } from "node:path";
 import { napCfg, GOC } from "./cfg.mjs";
 import { soatKichBan } from "./buoc/chung.mjs";
-import { xuatKho, ghiDanhSach, thuMucKho } from "./kho.mjs";
+import { xuatKho, ghiDanhSach, thuMucKho, duLieuDang, goiYLich } from "./kho.mjs";
+import { dangYouTube, coDangNhapYouTube } from "./yt.mjs";
 import {
   BUOC, moDb, themChuDe, layVideo, danhSachVideo, capNhatVideo, congChiPhi, xoaVideo,
   cacMucDang, layMucDang, danhDauMucDang, boDanhDauMucDang,
@@ -53,6 +54,21 @@ function docGioMoLai(chu) {
   const t = new Date(); t.setHours(h, ph, 0, 0);
   if (t.getTime() <= Date.now()) t.setDate(t.getDate() + 1);
   return t.getTime();
+}
+
+/** "24/09 20:00" (giờ máy) hoặc chuỗi ISO → Date; rỗng/hỏng → null. Quá khứ thì hiểu là năm sau. */
+function docGioHen(chu) {
+  if (!chu) return null;
+  const s = String(chu).trim();
+  const m = s.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{4}))?[ ,]+(\d{1,2}):(\d{2})$/);
+  if (m) {
+    const nam = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
+    const d = new Date(nam, parseInt(m[2], 10) - 1, parseInt(m[1], 10), parseInt(m[4], 10), parseInt(m[5], 10), 0, 0);
+    if (!m[3] && d <= new Date()) d.setFullYear(d.getFullYear() + 1);
+    return d;
+  }
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 const thuLai = new Map();  // "videoId:buoc" → số lần đã tự thử lại
@@ -189,6 +205,28 @@ const server = createServer(async (req, res) => {
     }
 
     // Kho đăng: đánh dấu từng mục (video dài / Short) đã đăng
+    // Đăng thẳng lên YouTube (cần cấp quyền một lần: node tools/yt-dang-nhap.mjs)
+    const mu = p.match(/^\/api\/kho\/(\d+)\/dang-youtube$/);
+    if (req.method === "POST" && mu) {
+      const m = layMucDang(parseInt(mu[1], 10));
+      if (!m) return json(res, 404, { loi: "không có mục" });
+      if (m.youtube_id) return json(res, 400, { loi: "mục này đã đăng rồi" });
+      if (!coDangNhapYouTube()) return json(res, 400, { loi: "Chưa cấp quyền YouTube — chạy: node tools/yt-dang-nhap.mjs" });
+      const b = await docBody(req);
+      // "24/09 20:00" hoặc ISO; bỏ trống = để riêng tư, chủ kênh tự bật
+      const hen = docGioHen(b.hen) ?? (b.theo_lich ? docGioHen(goiYLich(cacMucDang()).get(m.id)) : null);
+      try {
+        dangChay = { videoId: m.video_id, buoc: 0, chiTiet: `đăng YouTube: ${m.tieu_de || ""}` };
+        const kq = await dangYouTube({ ...duLieuDang(cfg, m), hen, bao: (c) => { dangChay.chiTiet = c; } });
+        danhDauMucDang(m.id, kq.videoId);
+        if (m.loai === "dai") capNhatVideo(m.video_id, { trang_thai: "da_dang", youtube_id: kq.videoId });
+        ghiDanhSach(cfg);
+        return json(res, 200, { ok: true, ...kq });
+      } catch (e) {
+        return json(res, 400, { loi: e.message });
+      } finally { dangChay = null; }
+    }
+
     const mk = p.match(/^\/api\/kho\/(\d+)\/(da-dang|chua-dang)$/);
     if (req.method === "POST" && mk) {
       const m = layMucDang(parseInt(mk[1], 10));
@@ -210,10 +248,12 @@ const server = createServer(async (req, res) => {
       return json(res, 200, {
         dang_chay: dangChay, hang_doi: hangDoi.map(h => h.videoId), tam_dung: tamDung,
         video: danhSachVideo(), chi_phi_thang: th,
-        kho: { thu_muc: thuMucKho(cfg), muc: cacMucDang() },
+        kho: (() => { const muc = cacMucDang(), lich = goiYLich(muc);
+          return { thu_muc: thuMucKho(cfg), muc: muc.map(m => ({ ...m, goi_y: lich.get(m.id) || null })) }; })(),
         cfg: { model: { nghien_cuu: cfg.XV_MODEL_NGHIEN_CUU, kich_ban: cfg.XV_MODEL_KICH_BAN, hinh: cfg.XV_MODEL_HINH, sieu_du_lieu: cfg.XV_MODEL_SIEU_DU_LIEU },
                tts: cfg.XV_TTS, giong: cfg.XV_TTS_GIONG, phu_de: cfg.XV_PHU_DE, nguon_claude: cfg.XV_CLAUDE || "cli",
-               co_khoa: (cfg.XV_CLAUDE || "cli") === "cli" ? true : !!cfg.ANTHROPIC_API_KEY },
+               co_khoa: (cfg.XV_CLAUDE || "cli") === "cli" ? true : !!cfg.ANTHROPIC_API_KEY,
+               yt: coDangNhapYouTube() },
       });
     }
 

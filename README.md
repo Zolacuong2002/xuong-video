@@ -94,7 +94,10 @@ thu âm → render → dựng → phụ đề → thumbnail. Ra `ra/<thu-may>/vi
 4. Máy chạy bước 03–10 (video 30 phút mất ~3 giờ, phần lớn là thu âm) rồi dừng ở **⛔ cổng duyệt 2**:
    xem thử mp4, 3 Shorts, chọn tiêu đề → **Duyệt**.
 5. Tab **Thư viện** = **kho đăng**: mỗi video một ngăn, file `…-DAN-VAO-YOUTUBE.txt` có tiêu đề, mô tả với
-   mốc thời gian, thẻ, danh sách phát — dán từng khối vào YouTube Studio. Đăng xong bấm **Đã đăng**, dán link.
+   mốc thời gian, thẻ, danh sách phát — dán từng khối vào YouTube Studio. Đăng xong bấm **Đã đăng tay**, dán link.
+   Hoặc cấp quyền YouTube một lần (`node tools/yt-dang-nhap.mjs`) rồi bấm **Đăng YouTube**: máy tải lên, đặt hình
+   thu nhỏ, phụ đề, danh sách phát, khai nội dung AI và hẹn giờ. Lưu ý: dự án API chưa qua audit thì YouTube khoá
+   video ở chế độ riêng tư — xem `tai-lieu/huong-dan-dang-youtube.pdf`.
 
 Hết hạn mức Claude: đèn góc phải chuyển hổ phách, ghi giờ mở lại; máy tự chạy tiếp, không cần làm gì.
 Muốn làm lại một bước: thẻ video → **Chạy lại từ bước N**.
@@ -103,6 +106,8 @@ Muốn làm lại một bước: thẻ video → **Chạy lại từ bước N**
 
 | Lệnh | Làm gì |
 |---|---|
+| `node tools/yt-dang-nhap.mjs` | cấp quyền YouTube một lần → tab Thư viện có nút **Đăng YouTube** (tải video + hình thu nhỏ + phụ đề + danh sách phát + hẹn giờ). Xem `tai-lieu/huong-dan-dang-youtube.pdf` |
+| `node tools/do-kenh.mjs` | đo lượt xem thật của mọi mục đã đăng (Apify) → `nganh/<ngày>-do-kenh.md` |
 | `node tools/nganh.mjs kham-pha "từ khoá" …` | tìm kênh trong ngách theo tổng view (Apify) |
 | `node tools/nganh.mjs kenh <url kênh> …` | quét video gần nhất của kênh đối chiếu, bảng mẫu tiêu đề đang thắng |
 | `node tools/nganh.mjs chu-de "từ khoá"` | video cùng chủ đề đang ăn view |

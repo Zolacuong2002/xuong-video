@@ -24,6 +24,10 @@ const MAC_DINH = {
   XV_NGANH: "1",
   XV_NGANH_SO: "12",
   XV_APIFY_TOKEN: "",
+  // Đăng thẳng lên YouTube (YouTube Data API v3). Lấy ở Google Cloud Console → OAuth client ID → Desktop app.
+  // Cấp quyền một lần: node tools/yt-dang-nhap.mjs → lưu .yt-token.json. Để trống = đăng tay như cũ.
+  XV_YT_CLIENT_ID: "",
+  XV_YT_CLIENT_SECRET: "",
   // Shorts cắt từ mỗi video dài: số Short (0 = tắt) và số tranh dọc vẽ mới cho mỗi Short (~110 neuron/tranh)
   XV_SHORTS_SO: "3",
   XV_SHORTS_ANH: "2",

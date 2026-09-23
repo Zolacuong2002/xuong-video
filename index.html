@@ -914,6 +914,7 @@ video{width:100%;border-radius:6px;background:#000;display:block}
   // ── THƯ VIỆN = KHO ĐĂNG ──
   function veThuVien(d){
     var kho = d.kho || { muc: [], thu_muc: "" };
+    var coYT = !!(d.cfg && d.cfg.yt);
     var ds = d.video.filter(function(v){ return v.trang_thai === "hang_doi" || v.trang_thai === "da_dang"; });
     $("trongThuVien").hidden = !!ds.length;
     var chua = kho.muc.filter(function(m){ return !m.youtube_id; });
@@ -931,7 +932,8 @@ video{width:100%;border-radius:6px;background:#000;display:block}
         var ten = (m.loai === "dai" ? "Video dài" : "Short " + m.so) + " · " + (m.giay ? Math.round(m.giay) + "s" : "");
         var yt = m.youtube_id
             ? '<a class="tt xong" href="https://youtu.be/' + e(m.youtube_id) + '" target="_blank">YT ✓ ' + e((m.dang_luc || "").slice(5, 10)) + '</a><button class="nut nho" data-cd="' + m.id + '" title="Bỏ đánh dấu YouTube">↺</button>'
-            : '<button class="nut nho chinh" data-dd="' + m.id + '">Đã đăng YT</button>';
+            : (coYT ? '<button class="nut nho chinh" data-up="' + m.id + '" data-goi="' + e(m.goi_y || "") + '" title="Máy tải thẳng lên YouTube, đặt hình thu nhỏ, phụ đề, danh sách phát và hẹn giờ">Đăng YouTube</button>' : '')
+              + '<button class="nut nho" data-dd="' + m.id + '" title="Anh tự đăng tay rồi thì dán link vào đây">Đã đăng tay</button>';
         return '<div class="dong"><span class="ten" title="' + e(m.file) + '">' + e(ten) + ' — ' + e(m.tieu_de || "") + '</span>' + yt + '</div>';
       }).join("");
       return '<article class="the">' +
@@ -957,6 +959,15 @@ video{width:100%;border-radius:6px;background:#000;display:block}
       } else if (b.dataset.cd) {
         if (!confirm("Bỏ đánh dấu đã đăng?")) return;
         await api("POST", "/api/kho/" + b.dataset.cd + "/chua-dang");
+      } else if (b.dataset.up) {
+        var gio = prompt("Hẹn giờ đăng (bỏ trống = tải lên để riêng tư, anh tự bật):", b.dataset.goi || "");
+        if (gio === null) return;
+        b.disabled = true; b.textContent = "Đang tải lên…";
+        try {
+          var k = await api("POST", "/api/kho/" + b.dataset.up + "/dang-youtube", { hen: gio.trim() });
+          bao("Đã lên YouTube: " + k.url + (k.hen ? " · hẹn " + k.hen.slice(0, 16).replace("T", " ") : " · đang riêng tư")
+            + (k.loi_phu && k.loi_phu.length ? " · lỗi phụ: " + k.loi_phu.join("; ") : ""));
+        } finally { b.disabled = false; b.textContent = "Đăng YouTube"; }
       } else if (b.dataset.xk) {
         var r = await api("POST", "/api/video/" + b.dataset.xk + "/xuat-kho");
         bao("Đã xuất " + (r.kho && r.kho.muc ? r.kho.muc.length : 0) + " mục vào kho.");
