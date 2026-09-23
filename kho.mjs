@@ -157,6 +157,10 @@ function banDanShort(sh, kq, tieuDeDai, goc, dsp) {
     `──────────────────────────────────────────`,
     (sh?.mo_ta || "").trim(),
     ``,
+    `BÌNH LUẬN GHIM  (đăng xong dán vào ô bình luận, rồi bấm ba chấm → Ghim)`,
+    `──────────────────────────────────────────`,
+    (sh?.binh_luan_ghim || "").trim() || `Bản đầy đủ nằm trong video dài "${tieuDeDai}" trên kênh. Bạn định làm việc nào trước?`,
+    ``,
     `THẺ  (đã có dấu phẩy)`,
     `──────────────────────────────────────────`,
     (sh?.tags || []).join(", "),
@@ -168,7 +172,7 @@ function banDanShort(sh, kq, tieuDeDai, goc, dsp) {
     `Hình thu nhỏ      : chọn khung hình ở giây 0 (tiêu đề to + nhân vật biểu cảm, chưa có phụ đề chạy)`,
     `Đối tượng         : Không dành cho trẻ em`,
     `Nội dung chỉnh sửa: Có — giọng và tranh do AI tạo`,
-    `Giờ đăng          : 11:45 hoặc 20:00, mỗi ngày MỘT Short`,
+    `Giờ đăng          : 20:00, mỗi ngày ĐÚNG MỘT mục lên sóng (Short hoặc video dài, không trùng ngày)`,
     ``,
   ].join("\n");
 }
@@ -176,21 +180,30 @@ function banDanShort(sh, kq, tieuDeDai, goc, dsp) {
 
 
 // ── DANH-SACH.md: bảng tổng + hôm nay đăng gì ──
-const NGAY_DAI = new Set([1, 3, 5]); // T2 · T4 · T6
+// Đo 23/09/2026: mỗi mục lên sóng là một lần YouTube đem kênh đi thử với nhóm người xem mới.
+// Hai mục cùng ngày thì chúng tranh nhau một nhóm, hôm sau kênh lại im → rải MỖI NGÀY ĐÚNG MỘT MỤC.
+// Video dài 2 bài/tuần (T3 · T6) để vẫn tích giờ xem; các ngày còn lại là Short.
+const NGAY_DAI = new Set([2, 5]); // T3 · T6
 
 export function goiYLich(muc, tuNgay = new Date()) {
-  // video dài chưa đăng → các T2/T4/T6 kế tiếp; Short chưa đăng → mỗi ngày một cái từ ngày mai
   const ra = new Map();
-  let d = new Date(tuNgay); d.setHours(0, 0, 0, 0);
+  const d0 = new Date(tuNgay); d0.setHours(0, 0, 0, 0);
+  const khoa = (x) => x.toISOString().slice(0, 10);
+  const daDung = new Set();           // ngày đã có mục lên sóng
   const dai = muc.filter(m => m.loai === "dai" && !m.youtube_id);
-  let nd = new Date(d);
+  const nd = new Date(d0);
   for (const m of dai) {
-    do { nd.setDate(nd.getDate() + 1); } while (!NGAY_DAI.has(nd.getDay()));
+    do { nd.setDate(nd.getDate() + 1); } while (!NGAY_DAI.has(nd.getDay()) || daDung.has(khoa(nd)));
+    daDung.add(khoa(nd));
     ra.set(m.id, `${fmt(nd)} 19:30`);
   }
   const shorts = muc.filter(m => m.loai === "short" && !m.youtube_id);
-  let ns = new Date(d);
-  for (const m of shorts) { ns.setDate(ns.getDate() + 1); ra.set(m.id, `${fmt(ns)} 20:00`); }
+  const ns = new Date(d0);
+  for (const m of shorts) {
+    do { ns.setDate(ns.getDate() + 1); } while (daDung.has(khoa(ns)));
+    daDung.add(khoa(ns));
+    ra.set(m.id, `${fmt(ns)} 20:00`);
+  }
   return ra;
 }
 const fmt = (x) => `${pad2(x.getDate())}/${pad2(x.getMonth() + 1)}`;
@@ -228,7 +241,8 @@ export function ghiDanhSach(cfg) {
     `|---|---|---|---|---|---|---|`,
     ...dong,
     ``,
-    `Nhịp: 1 Short mỗi ngày (11:45 hoặc 20:00) · video dài T2 · T4 · T6 lúc 19:30. Chi tiết và 3 số cần nhìn: \`nhan-vat/kenh/thong-tin-kenh.md\`.`,
+    `Nhịp: mỗi ngày ĐÚNG MỘT mục lên sóng — video dài T3 và T6 lúc 19:30, các ngày còn lại một Short lúc 20:00.`,
+    `Đăng Short xong nhớ dán khối BÌNH LUẬN GHIM rồi ghim lại. Chi tiết và 3 số cần nhìn: \`nhan-vat/kenh/thong-tin-kenh.md\`.`,
     ``,
   ].join("\n");
   ghiChu(join(kho, "DANH-SACH.md"), md);

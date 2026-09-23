@@ -24,11 +24,12 @@ const SCHEMA = {
       type: "array", minItems: 1, maxItems: 6,
       items: {
         type: "object", additionalProperties: false,
-        required: ["tieu_de", "nhan", "mo_ta", "tags", "doan"],
+        required: ["tieu_de", "nhan", "mo_ta", "binh_luan_ghim", "tags", "doan"],
         properties: {
           tieu_de: { type: "string", description: "Tiêu đề Short ≤ 55 ký tự, mở đầu bằng con số hoặc câu hỏi ngắn, không hashtag, không viết hoa toàn bộ." },
           nhan: { type: "string", description: "Cụm 1–3 từ nằm NGUYÊN VĂN trong tieu_de để tô màu nổi (thường là con số)." },
           mo_ta: { type: "string", description: "Mô tả 2–3 dòng, dòng cuối là đúng 3 hashtag: #Shorts và 2 hashtag tài chính." },
+          binh_luan_ghim: { type: "string", description: "Bình luận sẽ ghim dưới Short, 1–2 câu: nhắc lại con số của Short + mời xem bản đầy đủ trên kênh + hỏi lại người xem một câu ngắn để họ trả lời. Không dán link (kênh mới chưa có link), không quá 200 ký tự." },
           tags: { type: "array", minItems: 5, maxItems: 10, items: { type: "string" } },
           doan: {
             type: "array", minItems: 4, maxItems: 6,
@@ -54,10 +55,14 @@ MỖI SHORT LÀ MỘT Ý DUY NHẤT lấy từ video dài — không tóm tắt 
 Nhịp đọc 215 từ/phút → TỔNG lời đọc mỗi Short 165–195 từ, không hơn. Chia 4–6 đoạn, mỗi đoạn 25–45 từ.
 
 CẤU TRÚC BẮT BUỘC:
-1. Đoạn 1 = HOOK: câu đầu ≤ 12 từ, có con số hoặc câu hỏi trúng nỗi đau ("Lương mười lăm triệu mà cuối tháng còn hai trăm nghìn?"). Không chào, không giới thiệu kênh.
+1. Đoạn 1 = HOOK, quan trọng hơn cả phần còn lại cộng lại. Đo trên chính kênh này: Short mở bằng SỐ TIỀN + TÌNH HUỐNG AI CŨNG GẶP đạt 195–905 lượt xem; Short mở bằng khái niệm hoặc thuật ngữ chỉ đạt 1–51 lượt xem. Vì vậy câu đầu ≤ 12 từ và BẮT BUỘC theo khuôn: <một con số tiền cụ thể> + <chuyện quen thuộc của người đi làm> + <câu hỏi ngược>.
+   ĐÚNG (đã thắng): "Hai triệu tiền cưới mỗi tháng, bạn lấy ở đâu ra?" · "Bốn trăm bốn mươi nghìn mỗi tháng chỉ để khỏi đi bộ xuống đường?" · "Lương hai mươi triệu, về tay chỉ mười bảy phẩy bảy tám triệu?"
+   SAI (đã thua): "Quỹ dự phòng đo sai chỗ" · "Những gói bạn quên huỷ" · "Bảo hiểm thủng bốn chỗ" — mở bằng khái niệm, người xem lướt qua trước khi hiểu.
+   Không chào, không giới thiệu kênh, không nói "hôm nay mình nói về".
 2. Đoạn giữa = một ý + con số + lý do vì sao xảy ra. Nói như kể cho bạn thân, xưng "mình" – gọi "bạn".
 3. Đoạn áp chót = ĐÚNG MỘT việc làm được ngay tối nay.
-4. Đoạn cuối ≤ 20 từ: nêu bản dài có bao nhiêu khoản/ý, mời xem trên kênh ${cfg.XV_TEN_KENH}. Không nói "đăng ký", không nói "link mô tả".
+4. Đoạn cuối ≤ 22 từ, làm ĐÚNG hai việc theo thứ tự: (a) nêu bản dài có bao nhiêu khoản/ý; (b) một lời mời đăng ký NGẮN, tự nhiên, gắn với lợi ích — ví dụ "Đăng ký kênh ${cfg.XV_TEN_KENH} để mỗi tuần bớt một chỗ rò tiền." Chỉ một câu mời, không nài nỉ, không nói "link mô tả", không nói "bấm chuông".
+   Dòng chữ to (tieu_de) của đoạn cuối luôn là: "Đăng ký ${cfg.XV_TEN_KENH}".
 
 Quy tắc lời đọc: số viết bằng chữ (mười lăm triệu, ba mươi lăm nghìn), không dùng ký hiệu %, không viết tắt, không gạch đầu dòng, không emoji. Không hứa làm giàu, không khuyên mua mã nào, không nhắc tên ngân hàng/app.
 Dòng chữ to (tieu_de mỗi đoạn): ≤ 6 từ, được dùng chữ số (15 triệu, 35k).
