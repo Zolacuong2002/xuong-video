@@ -6,7 +6,7 @@ import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, re
 import { join, extname, normalize } from "node:path";
 import { napCfg, GOC } from "./cfg.mjs";
 import { soatKichBan } from "./buoc/chung.mjs";
-import { xuatKho, ghiDanhSach, thuMucKho } from "./kho.mjs";
+import { xuatKho, ghiDanhSach, thuMucKho, coTikTok } from "./kho.mjs";
 import {
   BUOC, moDb, themChuDe, layVideo, danhSachVideo, capNhatVideo, congChiPhi, xoaVideo,
   cacMucDang, layMucDang, danhDauMucDang, boDanhDauMucDang, danhDauTikTok, boDanhDauTikTok,
@@ -218,7 +218,8 @@ const server = createServer(async (req, res) => {
         kho: { thu_muc: thuMucKho(cfg), muc: cacMucDang() },
         cfg: { model: { nghien_cuu: cfg.XV_MODEL_NGHIEN_CUU, kich_ban: cfg.XV_MODEL_KICH_BAN, hinh: cfg.XV_MODEL_HINH, sieu_du_lieu: cfg.XV_MODEL_SIEU_DU_LIEU },
                tts: cfg.XV_TTS, giong: cfg.XV_TTS_GIONG, phu_de: cfg.XV_PHU_DE, nguon_claude: cfg.XV_CLAUDE || "cli",
-               co_khoa: (cfg.XV_CLAUDE || "cli") === "cli" ? true : !!cfg.ANTHROPIC_API_KEY },
+               co_khoa: (cfg.XV_CLAUDE || "cli") === "cli" ? true : !!cfg.ANTHROPIC_API_KEY,
+               tiktok: coTikTok(cfg) },
       });
     }
 

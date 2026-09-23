@@ -10,12 +10,14 @@
 // File video là HARD LINK sang ra/<video>/ (không tốn thêm dung lượng, làm lại video là kho tự mới);
 // ổ khác thì chép. Trạng thái đã đăng lưu ở bảng muc_dang, bấm trong tab Thư viện.
 import { join, isAbsolute } from "node:path";
-import { existsSync, mkdirSync, linkSync, copyFileSync, unlinkSync, statSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, linkSync, copyFileSync, unlinkSync, statSync, readdirSync, rmSync } from "node:fs";  // unlinkSync: dọn bản dán TikTok khi tắt
 import { GOC } from "./cfg.mjs";
 import { layVideo, capSoKho, ghiMucDang, cacMucDang } from "./db.mjs";
 import { docJson, ghiChu } from "./buoc/chung.mjs";
 
 export const TEN_KHO = "kho-dang";
+// Đăng song song TikTok — tắt mặc định, bật bằng XV_TIKTOK=1 trong config.env
+export const coTikTok = (cfg) => String(cfg?.XV_TIKTOK || "0") === "1";
 
 export function thuMucKho(cfg) {
   const p = (cfg.XV_KHO_DANG || TEN_KHO).trim();
@@ -104,7 +106,9 @@ export function xuatKho(cfg, videoId) {
       const tenFile = `${goc}-Short-${sh.so}.mp4`;
       datFile(nguon, join(ngan, tenFile));
       ghiChu(join(ngan, `${goc}-Short-${sh.so}-DAN-VAO-YOUTUBE.txt`), banDanShort(kb.shorts[i], sh, tieuDe, goc, dsp));
-      ghiChu(join(ngan, `${goc}-Short-${sh.so}-DAN-VAO-TIKTOK.txt`), banDanTikTok(cfg, kb.shorts[i], sh, tieuDe, goc));
+      const fTikTok = join(ngan, `${goc}-Short-${sh.so}-DAN-VAO-TIKTOK.txt`);
+      if (coTikTok(cfg)) ghiChu(fTikTok, banDanTikTok(cfg, kb.shorts[i], sh, tieuDe, goc));
+      else if (existsSync(fTikTok)) { try { unlinkSync(fTikTok); } catch {} }
       const m = { loai: "short", so: sh.so, file: `${tenNgan}/${tenFile}`, tieu_de: kb.shorts[i]?.tieu_de || sh.tieu_de, giay: sh.giay, danh_sach_phat: dsp };
       ghiMucDang(videoId, m); muc.push(m);
     });
@@ -231,6 +235,7 @@ export function ghiDanhSach(cfg) {
   const lich = goiYLich(muc);
   const daDang = muc.filter(m => m.youtube_id).length;
   const shorts = muc.filter(m => m.loai === "short");
+  const tiktok = coTikTok(cfg);
   const daTikTok = shorts.filter(m => m.tiktok_id).length;
   const dong = muc.map(m => {
     const ten = m.loai === "dai" ? `**Video dài**` : `Short ${m.so}`;
@@ -238,7 +243,7 @@ export function ghiDanhSach(cfg) {
       ? `✅ ${m.dang_luc ? m.dang_luc.slice(0, 10) : ""} · https://youtu.be/${m.youtube_id}`
       : `⬜ chưa · gợi ý ${lich.get(m.id) || ""}`;
     const tk = m.loai !== "short" ? "—" : m.tiktok_id ? `✅ ${m.tiktok_luc ? m.tiktok_luc.slice(0, 10) : ""}` : `⬜ chưa`;
-    return `| ${pad2(m.so_kho)} | ${ten} | ${m.tieu_de || ""} | \`${m.file}\` | ${m.giay ? Math.round(m.giay) + "s" : ""} | ${m.danh_sach_phat || ""} | ${tt} | ${tk} |`;
+    return `| ${pad2(m.so_kho)} | ${ten} | ${m.tieu_de || ""} | \`${m.file}\` | ${m.giay ? Math.round(m.giay) + "s" : ""} | ${m.danh_sach_phat || ""} | ${tt} |` + (tiktok ? ` ${tk} |` : "");
   });
   const tiep = muc.filter(m => !m.youtube_id);
   const tiepShort = tiep.find(m => m.loai === "short"), tiepDai = tiep.find(m => m.loai === "dai");
@@ -246,7 +251,7 @@ export function ghiDanhSach(cfg) {
   const md = [
     `# Kho đăng — ${cfg.XV_TEN_KENH}`,
     ``,
-    `Cập nhật ${new Date().toLocaleString("vi-VN")} · YouTube ${daDang}/${muc.length} mục · TikTok ${daTikTok}/${shorts.length} Short.`,
+    `Cập nhật ${new Date().toLocaleString("vi-VN")} · YouTube ${daDang}/${muc.length} mục.` + (tiktok ? ` TikTok ${daTikTok}/${shorts.length} Short.` : ""),
     `Mỗi ngăn một video dài + các Short cắt từ nó. Mở file \`…-DAN-VAO-YOUTUBE.txt\` cạnh video, dán từng khối.`,
     `Đăng xong → tab **Thư viện** trong Xưởng → bấm "Đã đăng" và dán link, bảng này tự cập nhật.`,
     ``,
@@ -254,12 +259,12 @@ export function ghiDanhSach(cfg) {
     ``,
     tiepShort ? `- **Short kế tiếp:** ${tiepShort.tieu_de} → \`${tiepShort.file}\`` : `- Short: hết hàng — chạy video dài mới để có thêm.`,
     tiepDai ? `- **Video dài kế tiếp:** ${tiepDai.tieu_de} → \`${tiepDai.file}\` (T2 · T4 · T6, 19:30)` : `- Video dài: hết hàng.`,
-    tiepTikTok ? `- **TikTok kế tiếp (20:30):** ${tiepTikTok.tieu_de} → \`${tiepTikTok.file}\` · caption trong file \`…-DAN-VAO-TIKTOK.txt\`` : `- TikTok: hết hàng.`,
+    ...(tiktok ? [tiepTikTok ? `- **TikTok kế tiếp (20:30):** ${tiepTikTok.tieu_de} → \`${tiepTikTok.file}\` · caption trong file \`…-DAN-VAO-TIKTOK.txt\`` : `- TikTok: hết hàng.`] : []),
     ``,
     `## Tất cả`,
     ``,
-    `| # | Loại | Tiêu đề | File trong kho | Dài | Danh sách phát | YouTube | TikTok |`,
-    `|---|---|---|---|---|---|---|---|`,
+    `| # | Loại | Tiêu đề | File trong kho | Dài | Danh sách phát | YouTube |` + (tiktok ? ` TikTok |` : ""),
+    `|---|---|---|---|---|---|---|` + (tiktok ? `---|` : ""),
     ...dong,
     ``,
     `Nhịp: 1 Short mỗi ngày (11:45 hoặc 20:00) · video dài T2 · T4 · T6 lúc 19:30. Chi tiết và 3 số cần nhìn: \`nhan-vat/kenh/thong-tin-kenh.md\`.`,

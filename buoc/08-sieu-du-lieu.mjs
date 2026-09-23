@@ -1,27 +1,46 @@
 // Bước 08 — Tiêu đề, mô tả, tag, chữ thumbnail. Ép JSON qua strict tool → sieu-du-lieu.json
 import { join } from "node:path";
 import { goi } from "../claude.mjs";
-import { thuMucVideo, docChu, docJson, ghiJson } from "./chung.mjs";
+import { thuMucVideo, docChu, docJson, ghiJson, tachMuc } from "./chung.mjs";
 import { cacDoan } from "../db.mjs";
 
 // Mốc thời gian (chapters) cho mô tả: 0:00 + mỗi mục một dòng, lấy từ moc.json (bước 06) và đoạn tieu_de (bước 03).
 // YouTube cần ≥ 3 mốc, mốc đầu 0:00, mỗi mốc ≥ 10 giây. Người xem nhảy mục thay vì rời video → giữ chân.
+const chuThuong = (s) => String(s || "").toLowerCase().replace(/\[nguồn \d+\]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
 export function mocThoiGian(tm, videoId) {
   const moc = docJson(join(tm, "moc.json"));
   if (!moc?.doan?.length) return "";
   const doan = cacDoan(videoId);
   const batDau = new Map(moc.doan.map(m => [m.thu_tu, m.bat_dau]));
   const dong = [{ t: 0, ten: "Mở đầu" }];
-  for (const d of doan) {
-    if (d.bo_cuc !== "tieu_de" || d.thu_tu === 1) continue;
-    const ten = String(d.du_lieu?.tieu_de || "").replace(/^\d+[.)]\s*/, "").trim();
-    const t = batDau.get(d.thu_tu);
-    // tên mục chung chung của model ("Mở", "Chốt", "Hook") không thành mốc
-    if (!ten || /^(mở|mở đầu|hook|chốt|kết|tóm lại|giới thiệu)$/i.test(ten) || t == null || t - dong[dong.length - 1].t < 10) continue;
-    dong.push({ t, ten });
+  const them = (t, ten) => { if (t != null && t - dong[dong.length - 1].t >= 10) dong.push({ t, ten }); };
+
+  // Cách 1 (chính): mỗi mục "## N. Tên" của kịch bản → đoạn đầu tiên đọc câu mở mục → mốc. Không phụ thuộc bố cục.
+  const muc = tachMuc(docChu(join(tm, "kich-ban.md"))).filter(m => /^\d+[.)]\s/.test(m.ten));
+  if (muc.length >= 2) {
+    let tuDoan = 0;
+    for (const m of muc) {
+      const dau = chuThuong(m.noi_dung).split(" ").slice(0, 7).join(" ");
+      if (!dau) continue;
+      const i = doan.findIndex((d, k) => k >= tuDoan && chuThuong(d.loi_doc).includes(dau));
+      if (i < 0) continue;
+      tuDoan = i + 1;
+      them(batDau.get(doan[i].thu_tu), m.ten.replace(/^\d+[.)]\s*/, "").trim());
+    }
+  }
+  // Cách 2 (dự phòng, video thử máy không có kịch bản): đoạn có bố cục tiêu đề
+  if (dong.length < 3) {
+    dong.length = 1;
+    for (const d of doan) {
+      if (d.bo_cuc !== "tieu_de" || d.thu_tu === 1) continue;
+      const ten = String(d.du_lieu?.tieu_de || "").replace(/^\d+[.)]\s*/, "").trim();
+      if (!ten || /^(mở|mở đầu|hook|chốt|kết|tóm lại|giới thiệu)$/i.test(ten)) continue;
+      them(batDau.get(d.thu_tu), ten);
+    }
   }
   const chot = doan.find(d => d.bo_cuc === "chot");
-  if (chot && batDau.get(chot.thu_tu) - dong[dong.length - 1].t >= 10) dong.push({ t: batDau.get(chot.thu_tu), ten: "Tóm lại" });
+  if (chot) them(batDau.get(chot.thu_tu), "Tóm lại");
   if (dong.length < 3) return "";
   const dd = (s) => { const g = Math.floor(s); return `${Math.floor(g / 60)}:${String(g % 60).padStart(2, "0")}`; };
   return "Mốc thời gian:\n" + dong.map(d => `${dd(d.t)} ${d.ten}`).join("\n");

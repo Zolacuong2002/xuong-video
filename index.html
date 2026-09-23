@@ -919,13 +919,14 @@ video{width:100%;border-radius:6px;background:#000;display:block}
     var chua = kho.muc.filter(function(m){ return !m.youtube_id; });
     var tiepShort = chua.filter(function(m){ return m.loai === "short"; })[0];
     var tiepDai = chua.filter(function(m){ return m.loai === "dai"; })[0];
-    var tiepTikTok = kho.muc.filter(function(m){ return m.loai === "short" && !m.tiktok_id; })[0];
+    var tiktok = !!(d.cfg && d.cfg.tiktok);
+    var tiepTikTok = tiktok && kho.muc.filter(function(m){ return m.loai === "short" && !m.tiktok_id; })[0];
     var daDang = kho.muc.length - chua.length;
     $("khoDau").innerHTML =
       '<div><div class="nhan">Kho đăng · YouTube ' + daDang + '/' + kho.muc.length + '</div><div class="duong">' + e(kho.thu_muc) + '</div></div>' +
       '<div class="tiep">' + (tiepShort ? 'Short kế tiếp: <b>' + e(tiepShort.tieu_de) + '</b>' : 'Short: hết hàng') + '</div>' +
       '<div class="tiep">' + (tiepDai ? 'Video dài kế tiếp: <b>' + e(tiepDai.tieu_de) + '</b>' : 'Video dài: hết hàng') + '</div>' +
-      '<div class="tiep">' + (tiepTikTok ? 'TikTok kế tiếp: <b>' + e(tiepTikTok.tieu_de) + '</b>' : 'TikTok: hết hàng') + '</div>';
+      (tiktok ? '<div class="tiep">' + (tiepTikTok ? 'TikTok kế tiếp: <b>' + e(tiepTikTok.tieu_de) + '</b>' : 'TikTok: hết hàng') + '</div>' : '');
     $("luoiThuVien").innerHTML = ds.map(function(v){
       var f = "/ra/" + e(v.ma) + "/";
       var muc = kho.muc.filter(function(m){ return m.video_id === v.id; });
@@ -934,7 +935,7 @@ video{width:100%;border-radius:6px;background:#000;display:block}
         var yt = m.youtube_id
             ? '<a class="tt xong" href="https://youtu.be/' + e(m.youtube_id) + '" target="_blank">YT ✓ ' + e((m.dang_luc || "").slice(5, 10)) + '</a><button class="nut nho" data-cd="' + m.id + '" title="Bỏ đánh dấu YouTube">↺</button>'
             : '<button class="nut nho chinh" data-dd="' + m.id + '">Đã đăng YT</button>';
-        var tk = m.loai !== "short" ? '' : m.tiktok_id
+        var tk = (!tiktok || m.loai !== "short") ? '' : m.tiktok_id
             ? '<span class="tt xong">TT ✓ ' + e((m.tiktok_luc || "").slice(5, 10)) + '</span><button class="nut nho" data-tc="' + m.id + '" title="Bỏ đánh dấu TikTok">↺</button>'
             : '<button class="nut nho" data-td="' + m.id + '">Đã đăng TikTok</button>';
         return '<div class="dong"><span class="ten" title="' + e(m.file) + '">' + e(ten) + ' — ' + e(m.tieu_de || "") + '</span>' + yt + tk + '</div>';
