@@ -220,12 +220,7 @@ export function danhDauMucDang(id, youtubeId) {
 export function boDanhDauMucDang(id) {
   moDb().prepare("UPDATE muc_dang SET youtube_id = NULL, dang_luc = NULL WHERE id = ?").run(id);
 }
-export function danhDauTikTok(id, tiktokId) {
-  moDb().prepare("UPDATE muc_dang SET tiktok_id = ?, tiktok_luc = datetime('now','localtime') WHERE id = ?").run(tiktokId ?? null, id);
-}
-export function boDanhDauTikTok(id) {
-  moDb().prepare("UPDATE muc_dang SET tiktok_id = NULL, tiktok_luc = NULL WHERE id = ?").run(id);
-}
+
 
 export function chiPhiThang() {
   return moDb().prepare(`

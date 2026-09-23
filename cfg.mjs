@@ -26,8 +26,6 @@ const MAC_DINH = {
   XV_APIFY_TOKEN: "",
   // Shorts cắt từ mỗi video dài: số Short (0 = tắt) và số tranh dọc vẽ mới cho mỗi Short (~110 neuron/tranh)
   XV_SHORTS_SO: "3",
-  // Đăng song song TikTok: 1 = kho ghi thêm bản dán TikTok + cột theo dõi. 0 = chỉ YouTube (mặc định)
-  XV_TIKTOK: "0",
   XV_SHORTS_ANH: "2",
   XV_TTS: "vieneu",
   XV_TTS_MAU: "giong/mau-giong.wav",

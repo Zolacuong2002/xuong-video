@@ -6,10 +6,10 @@ import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, re
 import { join, extname, normalize } from "node:path";
 import { napCfg, GOC } from "./cfg.mjs";
 import { soatKichBan } from "./buoc/chung.mjs";
-import { xuatKho, ghiDanhSach, thuMucKho, coTikTok } from "./kho.mjs";
+import { xuatKho, ghiDanhSach, thuMucKho } from "./kho.mjs";
 import {
   BUOC, moDb, themChuDe, layVideo, danhSachVideo, capNhatVideo, congChiPhi, xoaVideo,
-  cacMucDang, layMucDang, danhDauMucDang, boDanhDauMucDang, danhDauTikTok, boDanhDauTikTok,
+  cacMucDang, layMucDang, danhDauMucDang, boDanhDauMucDang,
   ghiBuoc, cacBuoc, cacDoan, chiPhiThang,
 } from "./db.mjs";
 
@@ -189,7 +189,7 @@ const server = createServer(async (req, res) => {
     }
 
     // Kho đăng: đánh dấu từng mục (video dài / Short) đã đăng
-    const mk = p.match(/^\/api\/kho\/(\d+)\/(da-dang|chua-dang|tiktok-da-dang|tiktok-chua-dang)$/);
+    const mk = p.match(/^\/api\/kho\/(\d+)\/(da-dang|chua-dang)$/);
     if (req.method === "POST" && mk) {
       const m = layMucDang(parseInt(mk[1], 10));
       if (!m) return json(res, 404, { loi: "không có mục" });
@@ -197,11 +197,6 @@ const server = createServer(async (req, res) => {
         const b = await docBody(req);
         danhDauMucDang(m.id, b.youtube_id ?? null);
         if (m.loai === "dai") capNhatVideo(m.video_id, { trang_thai: "da_dang", youtube_id: b.youtube_id ?? null });
-      } else if (mk[2] === "tiktok-da-dang") {
-        const b = await docBody(req);
-        danhDauTikTok(m.id, b.tiktok_id ?? "x");
-      } else if (mk[2] === "tiktok-chua-dang") {
-        boDanhDauTikTok(m.id);
       } else {
         boDanhDauMucDang(m.id);
       }
@@ -218,8 +213,7 @@ const server = createServer(async (req, res) => {
         kho: { thu_muc: thuMucKho(cfg), muc: cacMucDang() },
         cfg: { model: { nghien_cuu: cfg.XV_MODEL_NGHIEN_CUU, kich_ban: cfg.XV_MODEL_KICH_BAN, hinh: cfg.XV_MODEL_HINH, sieu_du_lieu: cfg.XV_MODEL_SIEU_DU_LIEU },
                tts: cfg.XV_TTS, giong: cfg.XV_TTS_GIONG, phu_de: cfg.XV_PHU_DE, nguon_claude: cfg.XV_CLAUDE || "cli",
-               co_khoa: (cfg.XV_CLAUDE || "cli") === "cli" ? true : !!cfg.ANTHROPIC_API_KEY,
-               tiktok: coTikTok(cfg) },
+               co_khoa: (cfg.XV_CLAUDE || "cli") === "cli" ? true : !!cfg.ANTHROPIC_API_KEY },
       });
     }
 

@@ -34,14 +34,13 @@ function tinhHuong(ten) {
       V({ id: 2, ma: "002-hai", tieu_de: "Video thứ hai", trang_thai: "moi" })],
       kho: { thu_muc: "D:\kho-dang", muc: [
         { id: 11, video_id: 1, loai: "dai", so: 0, file: "01 - X/Tien-Di-Dau-01.mp4", tieu_de: "Những khoản chi nhỏ âm thầm", giay: 1830, youtube_id: null },
-        { id: 12, video_id: 1, loai: "short", so: 1, file: "01 - X/Tien-Di-Dau-01-Short-1.mp4", tieu_de: "Short một", giay: 48, youtube_id: "zzz999" , dang_luc: "2026-09-14 20:00", tiktok_id: "7300000000000000001", tiktok_luc: "2026-09-16 20:30" },
+        { id: 12, video_id: 1, loai: "short", so: 1, file: "01 - X/Tien-Di-Dau-01-Short-1.mp4", tieu_de: "Short một", giay: 48, youtube_id: "zzz999" , dang_luc: "2026-09-14 20:00" },
         { id: 13, video_id: 1, loai: "short", so: 2, file: "01 - X/Tien-Di-Dau-01-Short-2.mp4", tieu_de: "Short hai", giay: 51, youtube_id: null } ] } }, buoc: buocXong(10) },
   };
   TH = bang[ten];
 }
-let TIKTOK = false;   // kênh mặc định chỉ đăng YouTube (XV_TIKTOK=0)
 const TIEN_DO = () => ({ ...TH.td, chi_phi_thang: { usd: 0, usd_quy_doi: 3.94, so_video: 1 },
-  cfg: { model: { kich_ban: "opus", hinh: "sonnet" }, tts: "vieneu", nguon_claude: "cli", co_khoa: true, tiktok: TIKTOK } });
+  cfg: { model: { kich_ban: "opus", hinh: "sonnet" }, tts: "vieneu", nguon_claude: "cli", co_khoa: true } });
 const CHI_TIET = (id) => ({
   video: TH.td.video.find((v) => v.id === id), buoc: TH.buoc, doan: [],
   nghien_cuu: "# Tóm tắt\n- 35.000đ một ly [nguồn 1]",
@@ -194,12 +193,7 @@ ok(!$("tab-thuvien").hidden && qa(".the").length === 1, "nút Mở thư viện �
 ok(/\/ra\/001-thu\/thumbnail\.png/.test(d.querySelector(".the-anh img").getAttribute("src")), "thẻ có thumbnail");
 ok(/Short kế tiếp/.test($("khoDau").textContent) && /Short hai/.test($("khoDau").textContent), "kho: Short kế tiếp = cái chưa đăng đầu tiên");
 ok(qa(".muc-kho .dong").length === 3 && qa(".muc-kho [data-dd]").length === 2 && qa(".muc-kho [data-cd]").length === 1, "kho: 3 mục, 2 nút Đã đăng YT, 1 đã xong");
-ok(!qa(".muc-kho [data-td]").length && !/TikTok/.test($("khoDau").textContent), "XV_TIKTOK=0 → không có nút/dòng TikTok nào");
-TIKTOK = true; await sang("hoan_tat"); bam(d.querySelector("#hienTai [data-tab-mo='thuvien']")); await cho(200);
-ok(qa(".muc-kho [data-td]").length === 1 && qa(".muc-kho [data-tc]").length === 1 && /TikTok kế tiếp/.test($("khoDau").textContent) && /Short hai/.test($("khoDau").textContent), "XV_TIKTOK=1 → TikTok: 1 Short chưa đăng, 1 đã đăng, gợi ý kế tiếp đúng");
-tlHoi = "https://www.tiktok.com/@kenh/video/7312345678901234567"; bam(d.querySelector("[data-td='13']")); await cho(60);
-ok(goi.some((g) => g.startsWith("POST /api/kho/13/tiktok-da-dang") && /7312345678901234567/.test(g)), "Đã đăng TikTok → POST + bóc ID từ link");
-TIKTOK = false;
+ok(!/TikTok/i.test($("khoDau").textContent) && !/TikTok/i.test(d.querySelector(".muc-kho").innerHTML), "thư viện chỉ có YouTube, không còn TikTok");
 tlHoi = "https://youtu.be/abc123xyz"; bam(d.querySelector("[data-dd='11']")); await cho(60);
 ok(goi.some((g) => g.startsWith("POST /api/kho/11/da-dang") && /abc123xyz/.test(g)), "Đã đăng video dài → POST kho + bóc ID từ link");
 tlHoi = "https://youtube.com/shorts/sh0rt1d"; bam(d.querySelector("[data-dd='13']")); await cho(60);
