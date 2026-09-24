@@ -145,6 +145,16 @@ function banDanDai(cfg, sdl, tieuDe, goc, video, dsp) {
   ].join("\n");
 }
 
+// Bình luận ghim: model trả về thì dùng, không thì tự dựng từ chính lời mô tả của Short.
+// Ghim một bình luận có câu hỏi là cách rẻ nhất để Short có bình luận đầu tiên — YouTube đọc tương tác đó.
+function ghimCua(sh, tieuDeDai) {
+  const tay = (sh?.binh_luan_ghim || "").trim();
+  if (tay) return tay;
+  const dong = String(sh?.mo_ta || "").split("\n").map(x => x.trim()).filter(x => x && !x.startsWith("#"));
+  const moc = (dong[0] || sh?.tieu_de || "").replace(/\s+/g, " ").trim();
+  return `${moc}\nBản đầy đủ nằm trong video "${tieuDeDai}" trên kênh. Bạn đang mất tiền ở khoản nào, kể mình nghe?`;
+}
+
 function banDanShort(sh, kq, tieuDeDai, goc, dsp) {
   return [
     `SHORT ${goc}-Short-${kq.so}  ·  ${Math.round(kq.giay || 0)} giây  ·  cắt từ "${tieuDeDai}"`,
@@ -159,7 +169,7 @@ function banDanShort(sh, kq, tieuDeDai, goc, dsp) {
     ``,
     `BÌNH LUẬN GHIM  (đăng xong dán vào ô bình luận, rồi bấm ba chấm → Ghim)`,
     `──────────────────────────────────────────`,
-    (sh?.binh_luan_ghim || "").trim() || `Bản đầy đủ nằm trong video dài "${tieuDeDai}" trên kênh. Bạn định làm việc nào trước?`,
+    ghimCua(sh, tieuDeDai),
     ``,
     `THẺ  (đã có dấu phẩy)`,
     `──────────────────────────────────────────`,

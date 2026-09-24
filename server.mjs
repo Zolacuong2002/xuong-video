@@ -2,7 +2,7 @@
 // Quản lý hàng chờ chủ đề, chạy dây chuyền từng video (một lúc một video), hai cổng duyệt người,
 // đếm tiền thật theo usage API trả về. Giao diện: index.html cùng thư mục.
 import { createServer } from "node:http";
-import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, readdirSync, unlinkSync } from "node:fs";
+import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, readdirSync, unlinkSync, rmSync } from "node:fs";
 import { join, extname, normalize } from "node:path";
 import { napCfg, GOC } from "./cfg.mjs";
 import { soatKichBan } from "./buoc/chung.mjs";
@@ -184,6 +184,9 @@ function guiFile(req, res, duongDan) {
 function anToan(ma) { return /^[a-z0-9-]+$/.test(ma); }
 // Phần lưu dở của từng bước (để chạy tiếp sau khi hết hạn mức) — xoá khi anh cố ý làm lại bước đó
 function xoaLuuDo(tm, so) {
+  // Bước 10: "chạy lại" = muốn bộ Shorts MỚI (kịch bản, giọng, tranh, mp4) → dọn cả thư mục.
+  // Chỉ xoá shorts.json thì giọng cũ còn nguyên, máy sẽ ghép lời mới với tiếng đọc cũ.
+  if (so === 10) { try { rmSync(join(tm, "shorts"), { recursive: true, force: true }); } catch {} return; }
   // bước 3 khoá theo nội dung kịch bản nên làm lại vẫn ra y vậy → giữ, không xoá
   const mau = { 2: /^kb-cum-.*\.md$|^dan-y\.json$/ }[so];
   if (!mau) return;
@@ -191,7 +194,6 @@ function xoaLuuDo(tm, so) {
     if (!existsSync(thu)) continue;
     for (const f of readdirSync(thu)) if (mau.test(f)) { try { unlinkSync(join(thu, f)); } catch {} }
   }
-  if (so === 10) { try { unlinkSync(join(tm, "shorts", "shorts.json")); } catch {} }
 }
 
 // ── định tuyến ──
